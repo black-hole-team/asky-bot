@@ -1,0 +1,19 @@
+include:
+  - path: ./compose/docker-networks.yml
+
+# Конфигурация redis
+services:
+  service-redis.black-hole.team:
+    image: redis:7.0.15
+    restart: always
+    volumes:
+      - ./config/redis:/usr/local/etc/redis
+      - ./volumes/service-redis.black-hole.team:/data/redis
+    networks:
+      - blackHoleNetwork
+    command: redis-server /usr/local/etc/redis/redis.conf
+
+# Постоянное хранилище данных
+volumes:
+  service-redis.black-hole.team:
+    driver: local

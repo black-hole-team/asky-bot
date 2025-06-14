@@ -1,0 +1,85 @@
+# Конфигурация вебхуков
+webhook {
+    # Порт для сервера обработки вебхуков
+    port = 443
+    # Базовый url для приёма вебхуков
+    base = "/webhook/:name"
+}
+
+# Конфигурация каналов взаимодействия
+channels {
+    # Список каналов
+    list {
+        # Конфигурация канала channel_id
+        channel_id {
+            # Тип канала - бот - телеграм
+            type = "telegram_bot"
+            # URL до вебхука
+            webhook_url = "https://asky.black-hole.team/webhook/channel_id"
+            # Признак необходимости использовать вебхук
+            use_webhook = false
+            # Параметры канала
+            params {
+                # Токен бота
+                token = "<BOT_TOKEN>"
+                # Максимальный размер файла - 50МБ
+                max_file_size = 50MB
+            }
+        }
+    }
+}
+
+# Конфигурация хабов обработки обращений
+hub {
+    # Шаблон наименования субъекта обращения
+    subject_name_pattern = "#${userId}-${channelId}"
+}
+
+# Конфигурация обработки сообщений
+handling {
+    # Количество потоков для обработки сообщений или -1, если значение должно принять количество потоков системы
+    handling_threads_count = -1
+    # Конфигурация маршрутизации обращений из одного канала в другой
+    routing {
+        # Канал channel_id позволяет обрабатывать свои обращения каналу channel_id (т.е. сам себе)
+        channel_id = [
+            "channel_id"
+        ]
+    }
+    # Конфигурация ролей пользователей хаба
+    roles {
+        # Конфигурация пользователей канала channel_id
+        channel_id {
+            # Формат: ID = "ROLE"
+            # Доступные роли: "ADMIN", "OPERATOR", "COMMON", "BAN"
+            974344494 = "ADMIN"
+
+            # Дефолтная роль для всех остальных
+            "*" = "COMMON"
+        }
+    }
+}
+
+# Конфигурация соединения с базой данных
+db {
+    # URL соединения
+    url = "jdbc:postgresql://service-postgresql.black-hole.team/asky"
+    # Имя пользователя
+    user = "asky"
+    # Пароль
+    password = "changeit"
+    # Максимальный размер пула
+    max_pool_size = 50
+    # Размер пакета отправляемых данных
+    batch_size = 100
+    # Драйвер базы данных
+    driver = "org.postgresql.Driver"
+}
+
+# Конфигурация redis
+redis {
+    # Хост соединения с redis
+    host = "service-redis.black-hole.team"
+    # Порт соединения с redis
+    port = 6379
+}

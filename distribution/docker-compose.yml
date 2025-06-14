@@ -1,0 +1,33 @@
+name: asky-bot
+
+# Подключаем корневые приложения
+include:
+  # Сети
+  - path: ./compose/docker-networks.yml
+  # Проекты
+  - path: ./compose/docker-postgresql.yml
+    project_directory: ./
+  - path: ./compose/docker-redis.yml
+    project_directory: ./
+
+# Конфигурация основного приложения
+services:
+  # Бот
+  service-asky-bot.black-hole.team:
+    build: .
+    restart: always
+    networks:
+      - blackHoleNetwork
+    ports:
+      - 8080:8080
+    environment:
+      - ASKY_PROFILES=prod
+    volumes:
+      - ./lib:/var/app/lib
+      - ./logs:/var/app/logs
+      - ./messages:/var/app/messages
+      - ./hooks:/var/app/hooks
+      - ./config:/var/app/config
+    depends_on:
+      - service-postgresql.black-hole.team
+      - service-redis.black-hole.team

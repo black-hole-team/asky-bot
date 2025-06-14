@@ -1,0 +1,10 @@
+networks:
+  # Внутренняя сеть приложения
+  blackHoleNetwork:
+    name: blackHoleNetwork
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        # На всякий случай зашиваем маску подсети докера
+        - subnet: 172.20.0.0/16

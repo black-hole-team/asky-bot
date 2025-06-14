@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+    <Appenders>
+        <Console name="STDOUT">
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%thread] %-5level %logger{5} - %msg%n"/>
+        </Console>
+        <RandomAccessFile name="FILE" fileName="${sys:homePath}/logs/${date:yyyy-MM-dd_hh-mm-ss}.log" append="true" immediateFlush="true">
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%thread] %-5level %logger{5} - %msg%n"/>
+        </RandomAccessFile>
+    </Appenders>
+    <Loggers>
+        <Root level="INFO">
+            <AppenderRef ref="STDOUT" />
+            <AppenderRef ref="FILE" />
+        </Root>
+    </Loggers>
+</Configuration>
