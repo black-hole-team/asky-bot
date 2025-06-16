@@ -54,6 +54,7 @@ public class TelegramBotChannel implements Channel, WebhookHandler {
         try {
             if (configuration.isUseWebhook()) {
                 telegramClient.execute(new SetWebhook(configuration.getWebhookUrl()));
+                log.info("Зарегистрирован webhook '{}' для канала '{}'", configuration.getId(), configuration.getWebhookUrl());
             } else {
                 telegramBotsLongPollingApplication.registerBot(configuration.getParam(TelegramBotChannelModule.BOT_TOKEN_CHANNEL_PARAM), updateHandler);
             }
@@ -68,9 +69,10 @@ public class TelegramBotChannel implements Channel, WebhookHandler {
         alive = false;
         try {
             if (configuration.isUseWebhook()) {
-                telegramBotsLongPollingApplication.unregisterBot(configuration.getParam(TelegramBotChannelModule.BOT_TOKEN_CHANNEL_PARAM));
-            } else {
                 telegramClient.execute(new DeleteWebhook());
+                log.info("Webhook '{}' для канала '{}' успешно удален", configuration.getId(), configuration.getWebhookUrl());
+            } else {
+                telegramBotsLongPollingApplication.unregisterBot(configuration.getParam(TelegramBotChannelModule.BOT_TOKEN_CHANNEL_PARAM));
             }
         } catch (TelegramApiException e) {
             alive = true;

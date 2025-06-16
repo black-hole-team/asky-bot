@@ -46,6 +46,7 @@ public class HookEngineProvider implements Provider<HookEngine> {
             log.info("Регистрация хуков типа '{}'", current);
             var hookDir = hooksDir.resolve(current.name().toLowerCase());
             if (!Files.exists(hookDir)) {
+                log.info("Хуки типа '{}' не найдены", current);
                 continue;
             }
             var hooks = new ArrayList<Hook>();

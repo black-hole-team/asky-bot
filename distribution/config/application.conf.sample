@@ -4,6 +4,35 @@ webhook {
     port = 443
     # Базовый url для приёма вебхуков
     base = "/webhook/:name"
+    # Хост для прослушивания
+    host = "0.0.0.0"
+    # Конфигурация ssl для запуска webhook сервера
+    #ssl {
+    #    # Порт ssl сервера
+    #    port = 8443
+    #    # Протоколы
+    #    protocols = ["TLSv1.3", "TLSv1.2"]
+
+    #    # Тип SSL: X.509, PKCS12
+    #    type = "PKCS12"
+    #    # Путь до сертификата
+    #    cert_path = server.p12
+    #    # Пароль от сертификата
+    #    cert_password = changeit
+    #    # Путь до доверенного сертификата
+    #    trust_cert_path = trust.pem
+    #    # Пароль от доверенного сертификата
+    #    trust_cert_password = changeit
+
+    #    # Тип SSL: X.509, PKCS12
+    #    type = "X.509"
+    #    # Путь до сертификата
+    #    cert_path = server.pem
+    #    # Путь до приватного ключа ключа
+    #    key_path = private.pem
+    #    # Пароль от приватного ключа
+    #    key_password = "change_it"
+    #}
 }
 
 # Конфигурация каналов взаимодействия

@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "team.black-hole.bot.asky"
-version = "1.0.0"
+version = "1.0.1"
 
 repositories {
     mavenCentral()
@@ -30,7 +30,10 @@ dependencies {
 
     // Telegram Bots
     implementation(libs.telegrambots.client)
-    implementation(libs.telegrambots.abilities)
+    implementation(libs.telegrambots.abilities) {
+        // У нас своя реализация webhook
+        exclude(group = "org.telegram", module = "telegrambots-webhook")
+    }
 
     // Базы данных и ORM
     implementation(libs.hibernate.core)
@@ -43,7 +46,7 @@ dependencies {
     implementation(libs.typesafe.config)
 
     // Http сервер
-    implementation(libs.javalin)
+    implementation(libs.jooby.jetty)
 
     // Redis
     implementation(libs.redis)
