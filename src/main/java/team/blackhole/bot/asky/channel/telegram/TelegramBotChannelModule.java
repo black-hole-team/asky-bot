@@ -3,9 +3,7 @@ package team.blackhole.bot.asky.channel.telegram;
 import com.google.inject.Binder;
 import com.google.inject.Module;
 import com.google.inject.Scopes;
-import org.eclipse.jetty.client.HttpClient;
 import org.telegram.telegrambots.longpolling.TelegramBotsLongPollingApplication;
-import team.blackhole.bot.asky.channel.telegram.providers.HttpClientProvider;
 import team.blackhole.bot.asky.channel.telegram.providers.TelegramBotsLongPollingApplicationProvider;
 
 /**
@@ -21,7 +19,6 @@ public class TelegramBotChannelModule implements Module {
 
     @Override
     public void configure(Binder binder) {
-        binder.bind(HttpClient.class).toProvider(HttpClientProvider.class).in(Scopes.SINGLETON);
         binder.bind(TelegramBotsLongPollingApplication.class).toProvider(TelegramBotsLongPollingApplicationProvider.class).in(Scopes.SINGLETON);
         binder.bind(TelegramBotChannelFactory.class).in(Scopes.SINGLETON);
     }

@@ -7,9 +7,8 @@ import lombok.RequiredArgsConstructor;
 import team.blackhole.bot.asky.db.hibernate.domains.Ticket;
 import team.blackhole.bot.asky.db.hibernate.domains.TicketStatus;
 import team.blackhole.bot.asky.db.hibernate.repository.TicketRepository;
-import team.blackhole.bot.asky.handling.events.HubCreatedEvent;
 import team.blackhole.bot.asky.handling.events.TicketCreatedEvent;
-import team.blackhole.bot.asky.handling.events.TicketStatusChangeEventCreatedEvent;
+import team.blackhole.bot.asky.handling.events.TicketStatusChangeEvent;
 import team.blackhole.bot.asky.service.chat.ChatService;
 import team.blackhole.bot.asky.service.ticket.data.CreateTicketData;
 
@@ -39,7 +38,8 @@ public class TicketServiceImpl implements TicketService {
         ticket.setSubject(data.subject());
         ticket.setTopics(new ArrayList<>());
         // Получаем или создаем чат
-        ticket.setChat(chatService.findByIdOrCreate(data.chatId()));
+        ticket.setChat(chatService.findChatByChannelChatIdAndChannelId(data.channelId(), data.channelChatId())
+                .orElseThrow());
         // Устанавливаем начальный статус OPEN
         ticket.setStatus(TicketStatus.OPEN);
         ticket = ticketRepository.save(ticket);
@@ -68,7 +68,7 @@ public class TicketServiceImpl implements TicketService {
         ticket.setStatus(status);
         ticket = ticketRepository.save(ticket);
 
-        eventBus.post(new TicketStatusChangeEventCreatedEvent(ticket, ticketPrevStatus));
+        eventBus.post(new TicketStatusChangeEvent(ticket, ticketPrevStatus));
 
         return ticket;
     }

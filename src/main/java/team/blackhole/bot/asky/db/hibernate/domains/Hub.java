@@ -17,13 +17,29 @@ import java.util.List;
 @Getter
 @Setter
 @Entity
-@Table(name = "hub")
+@Table(
+    name = "hub",
+    indexes = {
+        @Index(name = "idx_hub_channel_hub_id_channel_id", columnList = "channel_hub_id,channel_id", unique = true)
+    }
+)
 public class Hub implements PersistentEntity {
 
     /** Идентификатор */
+    @Id
     @Nonnull
-    @EmbeddedId
-    private HubId id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    /** Идентификатор хаба на стороне канала */
+    @Nonnull
+    @Column(name = "channel_hub_id")
+    private String channelHubId;
+
+    /** Идентификатор канала, на котором работает хаб */
+    @Nonnull
+    @Column(name = "channel_id")
+    private String channelId;
 
     /** Наименование хаба */
     @Nonnull

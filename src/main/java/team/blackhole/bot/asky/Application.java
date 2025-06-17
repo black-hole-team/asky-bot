@@ -16,6 +16,9 @@ import team.blackhole.bot.asky.db.DatabaseModule;
 import team.blackhole.bot.asky.db.jedis.JedisModule;
 import team.blackhole.bot.asky.handling.HandlersModule;
 import team.blackhole.bot.asky.providers.ProvidersModule;
+import team.blackhole.bot.asky.queue.QueueModule;
+import team.blackhole.bot.asky.scheduling.SchedulingModule;
+import team.blackhole.bot.asky.scheduling.SchedulingService;
 import team.blackhole.bot.asky.service.ServiceModule;
 
 import java.util.Map;
@@ -33,7 +36,7 @@ public class Application {
      */
     public static void main(String[] args) {
         var injector = Guice.createInjector(Stage.PRODUCTION, new AskyConfigurationModule(), new ProvidersModule(), new JedisModule(),
-                new DatabaseModule(), new ChannelModule(), new ServiceModule(), new HandlersModule());
+                new DatabaseModule(), new QueueModule(), new ChannelModule(), new ServiceModule(), new HandlersModule(), new SchedulingModule());
 
         // Регистрируем хуки завершения работы приложения
         registerShutdownHook(injector);
@@ -41,6 +44,10 @@ public class Application {
         // Запускаем обработку ботов
         log.info("Запуск пула ботов");
         injector.getInstance(ChannelPool.class).start();
+
+        // Запуск задач выполняемых по расписанию
+        log.info("Запуск задач выполняемых по расписанию");
+        injector.getInstance(SchedulingService.class).run();
 
         // Запускаем сервер для обработки вебхуков (если это необходимо)
         if (injector.getInstance(AskyChannelsConfiguration.class).hasWebhookChannel()) {

@@ -2,6 +2,7 @@ package team.blackhole.bot.asky.channel.telegram;
 
 import lombok.RequiredArgsConstructor;
 import org.telegram.telegrambots.meta.api.methods.forum.CreateForumTopic;
+import org.telegram.telegrambots.meta.api.methods.forum.DeleteForumTopic;
 import org.telegram.telegrambots.meta.api.methods.groupadministration.GetChat;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
@@ -18,9 +19,9 @@ public class TelegramBotHubCapability implements HubCapability {
     private final TelegramClient client;
 
     @Override
-    public HubInfo getInfo(long hubId) {
+    public HubInfo getInfo(String hubId) {
         try {
-            var chat = client.execute(new GetChat(String.valueOf(hubId)));
+            var chat = client.execute(new GetChat(hubId));
             return new HubInfo(chat.getTitle());
         } catch (TelegramApiException e) {
             throw new AskyException("Ошибка получения информации о хабе [hubId = %s]".formatted(hubId), e);
@@ -28,12 +29,23 @@ public class TelegramBotHubCapability implements HubCapability {
     }
 
     @Override
-    public HubTopicInfo createHubTopic(long hubId, String name) {
+    public HubTopicInfo createHubTopic(String hubId, String name) {
         try {
-            var topic = client.execute(new CreateForumTopic(String.valueOf(hubId), name));
-            return new HubTopicInfo(topic.getMessageThreadId(), hubId, topic.getName());
+            var topic = client.execute(new CreateForumTopic(hubId, name));
+            return new HubTopicInfo(String.valueOf(topic.getMessageThreadId()), hubId, topic.getName());
         } catch (TelegramApiException e) {
-            throw new AskyException("Ошибка получения информации о хабе [hubId = %s]".formatted(hubId), e);
+            throw new AskyException("Ошибка создания темы хаба [hubId = %s]".formatted(hubId), e);
+        }
+    }
+
+    @Override
+    public void deleteHubTopic(String hubId, String topicId) {
+        try {
+            if (!client.execute(new DeleteForumTopic(hubId, Integer.parseInt(topicId)))) {
+                throw new AskyException("Не удалось удалить тему хаба [hubId = %s, topicId = %s]".formatted(hubId, topicId));
+            }
+        } catch (TelegramApiException e) {
+            throw new AskyException("Ошибка удаления темы хаба [hubId = %s, topicId = %s]".formatted(hubId, topicId), e);
         }
     }
 }

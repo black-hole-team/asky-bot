@@ -5,7 +5,6 @@ import com.google.inject.Inject;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import team.blackhole.bot.asky.db.hibernate.domains.Hub;
-import team.blackhole.bot.asky.db.hibernate.domains.HubId;
 import team.blackhole.bot.asky.db.hibernate.repository.HubRepository;
 import team.blackhole.bot.asky.handling.events.HubCreatedEvent;
 import team.blackhole.bot.asky.service.hub.data.CreateHubData;
@@ -30,16 +29,25 @@ public class HubServiceImpl implements HubService {
     @Transactional
     public Hub create(CreateHubData data) {
         var hub = new Hub();
-        hub.setId(new HubId(data.id(), data.channelId()));
+
+        hub.setChannelHubId(data.channelHubId());
+        hub.setChannelId(data.channelId());
         hub.setName(data.name());
         hub = hubRepository.save(hub);
+
         eventBus.post(new HubCreatedEvent(hub));
+
         return hub;
     }
 
     @Override
-    public Optional<Hub> findById(HubId hubId) {
-        return hubRepository.findById(hubId);
+    public Optional<Hub> findById(long id) {
+        return hubRepository.findById(id);
+    }
+
+    @Override
+    public Optional<Hub> findHubByChannelHubIdAndChannelId(String channelId, String channelHubId) {
+        return hubRepository.findHubByChannelHubIdAndChannelId(channelId, channelHubId);
     }
 
     @Override

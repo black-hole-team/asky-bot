@@ -16,8 +16,9 @@ import java.util.Locale;
  * @param content     содержимое сообщения
  * @param attachments вложения сообщения
  * @param locale      локаль
+ * @param source      источник сообщения
  */
 @Builder
-public record ChannelMessage(ChannelType channelType, String channelId, long id, long chatId, Long topicId, long userId, String content,
-                             List<ChannelAttachment> attachments, Locale locale) {
+public record ChannelMessage(ChannelType channelType, String channelId, long id, String chatId, String topicId, long userId, String content,
+                             List<ChannelAttachment> attachments, Locale locale, ChannelMessageSource source) {
 }

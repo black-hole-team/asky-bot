@@ -1,13 +1,13 @@
-package team.blackhole.bot.asky.handling.stage;
+package team.blackhole.bot.asky.handling.command;
 
 import team.blackhole.bot.asky.db.jedis.domain.Stage;
 import team.blackhole.bot.asky.handling.events.MessageEvent;
 import team.blackhole.bot.asky.security.AskyUser;
 
 /**
- * Обработчик стадии общения с ботом
+ * Обработчик команд
  */
-public interface StageHandler {
+public interface CommandHandler {
 
     /**
      * Обрабатывает стадию и возвращает новую

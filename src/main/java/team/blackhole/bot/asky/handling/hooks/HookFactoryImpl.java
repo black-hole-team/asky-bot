@@ -2,7 +2,6 @@ package team.blackhole.bot.asky.handling.hooks;
 
 import com.google.inject.Inject;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
 import org.apache.logging.log4j.LogManager;
 import org.graalvm.polyglot.Context;
 import org.graalvm.polyglot.Source;

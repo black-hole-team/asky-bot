@@ -1,8 +1,12 @@
-package team.blackhole.bot.asky.handling.stage;
+package team.blackhole.bot.asky.handling.command.annotation;
 
 import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 import team.blackhole.bot.asky.channel.ChannelMessage;
+import team.blackhole.bot.asky.channel.ChannelMessageSource;
 import team.blackhole.bot.asky.db.jedis.domain.Stage;
+import team.blackhole.bot.asky.handling.command.CommandHandler;
+import team.blackhole.bot.asky.handling.command.CommandScope;
 import team.blackhole.bot.asky.handling.events.MessageEvent;
 import team.blackhole.bot.asky.security.AskyUser;
 import team.blackhole.bot.asky.security.AskyUserRole;
@@ -12,21 +16,23 @@ import team.blackhole.bot.asky.support.exception.AskyException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 /**
- * Обработчик стадии на основе команд
+ * Обработчик команд на основе аннотаций
  */
-public abstract class StageCommandHandler implements StageHandler {
+public abstract class AnnotationCommandHandler implements CommandHandler {
 
     /** Обработчик любой команды */
     public static final String ANY_COMMAND = "*";
 
     /** Карта, где ключ это команда, а значение это обработчик команды */
-    private final Map<String, StageHandler> commands = new HashMap<>();
+    private final Map<String, CommandHandler> commands = new HashMap<>();
+
+    /** Функции выполняемые перед обработкой сообщения */
+    private final List<Consumer<CommandContext>> beforeFunctions = new ArrayList<>();
 
     @Override
     public Stage handle(AskyUser user, Stage stage, MessageEvent event) {
@@ -44,8 +50,16 @@ public abstract class StageCommandHandler implements StageHandler {
      * @param command команда (например, "/start")
      * @param handler функция-обработчик команды
      */
-    protected void registerCommand(String command, StageHandler handler) {
+    protected void registerCommand(String command, CommandHandler handler) {
         commands.put(command, handler);
+    }
+
+    /**
+     * Регистрирует функции выполняемые перед обработкой сообщения
+     * @param beforeFunction функции выполняемые перед обработкой сообщения
+     */
+    protected void registerBefore(Consumer<CommandContext> beforeFunction) {
+        this.beforeFunctions.add(beforeFunction);
     }
 
     /**
@@ -78,12 +92,50 @@ public abstract class StageCommandHandler implements StageHandler {
     {
         var methods = ReflexionUtils.classOfObject(this).getDeclaredMethods();
         for (var method : methods) {
-            var command = method.getDeclaredAnnotation(StageCommand.class);
-            if (command == null) {
-                continue;
+            var before = method.getDeclaredAnnotation(BeforeCommand.class);
+            if (before != null) {
+                registerBefore(new BeforeCommandHandler(method, method.getParameters()));
             }
-            registerCommand(command.value(), new SecuredStageHandler(command, Set.of(command.role()), Set.of(command.scopes()),
-                    method, method.getParameters()));
+            var command = method.getDeclaredAnnotation(Command.class);
+            if (command != null) {
+                registerCommand(command.value(), new SecuredCommandHandler(command, Set.of(command.role()), Set.of(command.scopes()),
+                        method, method.getParameters()));
+            }
+        }
+    }
+
+    /**
+     * Действие выполняемое перед обработкой команды
+     */
+    @RequiredArgsConstructor
+    private class BeforeCommandHandler implements Consumer<CommandContext> {
+
+        /** Метод */
+        private final Method method;
+
+        /** Параметры */
+        private final Parameter[] parameters;
+
+        @Override
+        public void accept(CommandContext commandContext) {
+            try {
+                method.invoke(AnnotationCommandHandler.this, getParams(commandContext));
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                throw new AskyException("Ошибка при вызове метода '%s'".formatted(method.getName()), e);
+            }
+        }
+
+        /**
+         * Возвращает параметры для вызова метода
+         * @param context контекст команды
+         * @return параметры для вызова метода
+         */
+        private Object[] getParams(CommandContext context) {
+            var params = new Object[parameters.length];
+            for (var i = 0; i < parameters.length; i++) {
+                params[i] = context.get(parameters[i].getType());
+            }
+            return params;
         }
     }
 
@@ -91,16 +143,16 @@ public abstract class StageCommandHandler implements StageHandler {
      * Защищенный обработчик команд
      */
     @RequiredArgsConstructor
-    private class SecuredStageHandler implements StageHandler {
+    private class SecuredCommandHandler implements CommandHandler {
 
         /** Команда */
-        private final StageCommand command;
+        private final Command command;
 
         /** Список ролей */
         private final Set<AskyUserRole> roles;
 
         /** Список областей действия */
-        private final Set<StageCommandScope> scopes;
+        private final Set<CommandScope> scopes;
 
         /** Метод */
         private final Method method;
@@ -115,7 +167,7 @@ public abstract class StageCommandHandler implements StageHandler {
                 throw new AskyException("Доступ запрещен");
             }
             try {
-                return (Stage) method.invoke(StageCommandHandler.this, getParams(user, stage, event));
+                return (Stage) method.invoke(AnnotationCommandHandler.this, getParams(user, stage, event));
             } catch (IllegalAccessException | InvocationTargetException e) {
                 throw new AskyException("Ошибка при вызове метода команды '%s'".formatted(command.value()), e);
             }
@@ -131,13 +183,13 @@ public abstract class StageCommandHandler implements StageHandler {
             if (!roles.contains(user.role())) {
                 return false;
             }
-            if (message.chatId() > 0) {
-                return scopes.contains(StageCommandScope.COMMON);
+            if (message.source() == ChannelMessageSource.CHAT) {
+                return scopes.contains(CommandScope.COMMON);
             }
             if (message.topicId() == null) {
-                return scopes.contains(StageCommandScope.HUB) && message.chatId() < 0;
+                return scopes.contains(CommandScope.HUB) && message.source() == ChannelMessageSource.GROUP;
             } else {
-                return scopes.contains(StageCommandScope.TOPIC);
+                return scopes.contains(CommandScope.TOPIC);
             }
         }
 
@@ -149,18 +201,32 @@ public abstract class StageCommandHandler implements StageHandler {
          * @return параметры для вызова метода
          */
         private Object[] getParams(AskyUser user, Stage stage, MessageEvent event) {
+            var context = getCommandContext(user, stage, event);
+            for (var current : beforeFunctions) {
+                current.accept(context);
+            }
             var params = new Object[parameters.length];
             for (var i = 0; i < parameters.length; i++) {
-                var current = parameters[i];
-                if (current.getType().isAssignableFrom(AskyUser.class)) {
-                    params[i] = user;
-                } else if (current.getType().isAssignableFrom(Stage.class)) {
-                    params[i] = stage;
-                } else if (current.getType().isAssignableFrom(MessageEvent.class)) {
-                    params[i] = event;
-                }
+                params[i] = context.get(parameters[i].getType());
             }
             return params;
+        }
+
+        /**
+         * Возвращает контекст команды
+         * @param user  пользователь
+         * @param stage стадия
+         * @param event событие сообщения
+         * @return контекст команды
+         */
+        @NotNull
+        private static CommandContext getCommandContext(AskyUser user, Stage stage, MessageEvent event) {
+            var context = new CommandContext();
+            context.register(AskyUser.class, () -> user);
+            context.register(Stage.class, () -> stage);
+            context.register(MessageEvent.class, () -> event);
+            context.register(CommandContext.class, () -> context);
+            return context;
         }
     }
 }

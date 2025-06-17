@@ -20,7 +20,8 @@ import java.util.List;
 @Table(
     name = "ticket",
     indexes = {
-        @Index(name = "idx_ticket_status", columnList = "status")
+        @Index(name = "idx_ticket_status", columnList = "status"),
+        @Index(name = "idx_ticket_chat_id", columnList = "chat_id")
     }
 )
 public class Ticket implements PersistentEntity {

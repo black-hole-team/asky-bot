@@ -5,6 +5,7 @@ import com.google.common.eventbus.EventBus;
 import com.google.inject.Inject;
 import lombok.RequiredArgsConstructor;
 import org.eclipse.jetty.client.HttpClient;
+import org.jetbrains.annotations.NotNull;
 import org.telegram.telegrambots.client.jetty.JettyTelegramClient;
 import org.telegram.telegrambots.longpolling.TelegramBotsLongPollingApplication;
 import org.telegram.telegrambots.meta.TelegramUrl;
@@ -41,11 +42,25 @@ public class TelegramBotChannelFactory implements ChannelFactory {
     public Channel create(AskyChannelConfiguration configuration) {
         var token = Objects.requireNonNull(configuration.getParam(TelegramBotChannelModule.BOT_TOKEN_CHANNEL_PARAM));
         var client = new JettyTelegramClient(objectMapper, httpClient, token, TelegramUrl.DEFAULT_URL);
-        var updateHandler = new TelegramBotChannelUpdateHandler(client, eventBus, configuration.getId(), token);
+        return new TelegramBotChannel(configuration, client, objectMapper,
+                new TelegramBotChannelUpdateHandler(client, eventBus, configuration.getId(), token),
+                telegramBotsLongPollingApplication,
+                getCapabilities(configuration, client));
+    }
+
+    /**
+     * Возвращает возможности telegram бота
+     * @param configuration конфигурация бота
+     * @param client        клиент бота
+     * @return возможности telegram бота
+     */
+    @NotNull
+    private static HashMap<Class<? extends ChannelCapability>, ChannelCapability> getCapabilities(AskyChannelConfiguration configuration,
+                                                                                                  JettyTelegramClient client) {
         var capabilities = new HashMap<Class<? extends ChannelCapability>, ChannelCapability>();
         capabilities.put(ChatCapability.class, new TelegramBotChatCapability(client, FileUtils
                 .parseFileSize(configuration.getParam(TelegramBotChannelModule.BOT_MAX_FILE_SIZE_PARAM, "50MB"))));
         capabilities.put(HubCapability.class, new TelegramBotHubCapability(client));
-        return new TelegramBotChannel(configuration, client, objectMapper, updateHandler, telegramBotsLongPollingApplication, capabilities);
+        return capabilities;
     }
 }

@@ -1,7 +1,7 @@
 package team.blackhole.bot.asky.db.hibernate;
 
 /**
- * Персистентная сущность
+ * Постоянная сущность
  */
 public interface PersistentEntity {
 

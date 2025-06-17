@@ -28,6 +28,7 @@ public class HibernateModule implements Module {
 
         // Репозитории
         binder.bind(HubRepository.class).to(HubRepositoryImpl.class).in(Scopes.SINGLETON);
+        binder.bind(HubTopicRepository.class).to(HubTopicRepositoryImpl.class).in(Scopes.SINGLETON);
         binder.bind(TicketRepository.class).to(TicketRepositoryImpl.class).in(Scopes.SINGLETON);
         binder.bind(ChatRepository.class).to(ChatRepositoryImpl.class).in(Scopes.SINGLETON);
     }

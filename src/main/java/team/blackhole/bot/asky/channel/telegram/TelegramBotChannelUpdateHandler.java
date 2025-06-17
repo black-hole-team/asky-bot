@@ -6,13 +6,11 @@ import lombok.extern.log4j.Log4j2;
 import org.telegram.telegrambots.longpolling.util.LongPollingSingleThreadUpdateConsumer;
 import org.telegram.telegrambots.meta.api.methods.GetFile;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.api.objects.message.Message;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
-import team.blackhole.bot.asky.channel.ChannelAttachment;
-import team.blackhole.bot.asky.channel.ChannelMessage;
-import team.blackhole.bot.asky.channel.ChannelType;
-import team.blackhole.bot.asky.channel.ChannelAttachmentImpl;
+import team.blackhole.bot.asky.channel.*;
 import team.blackhole.bot.asky.handling.events.MessageEvent;
 import team.blackhole.bot.asky.support.exception.AskyException;
 
@@ -45,19 +43,29 @@ public class TelegramBotChannelUpdateHandler implements LongPollingSingleThreadU
     public void consume(Update update) {
         var message = update.getMessage();
         if (message != null) {
-            var from = message.getFrom();
-            bus.post(new MessageEvent(ChannelMessage.builder()
-                            .channelType(ChannelType.TELEGRAM_BOT)
-                            .channelId(channelId)
-                            .id(message.getMessageId())
-                            .chatId(message.getChatId())
-                            .topicId(message.getMessageThreadId() == null ? null : Long.valueOf(message.getMessageThreadId()))
-                            .userId(from.getId())
-                            .locale(from.getLanguageCode() == null ? Locale.getDefault() : new Locale(from.getLanguageCode()))
-                            .content(message.getText())
-                            .attachments(getAttachments(message))
-                            .build()));
+            bus.post(new MessageEvent(getChannelMessage(message, message.getFrom())));
         }
+    }
+
+    /**
+     * Возвращает представление сообщения из telegram как общее сообщение канала
+     * @param message сообщение telegram
+     * @param from    отправитель сообщения
+     * @return общее сообщение канала
+     */
+    private ChannelMessage getChannelMessage(Message message, User from) {
+        return ChannelMessage.builder()
+                .channelType(ChannelType.TELEGRAM_BOT)
+                .channelId(channelId)
+                .id(message.getMessageId())
+                .chatId(String.valueOf(message.getChatId()))
+                .topicId(message.getMessageThreadId() == null ? null : String.valueOf(message.getMessageThreadId()))
+                .content(message.getText())
+                .attachments(getAttachments(message))
+                .userId(from.getId())
+                .locale(from.getLanguageCode() == null ? Locale.getDefault() : new Locale(from.getLanguageCode()))
+                .source(message.getChatId() > 0 ? ChannelMessageSource.CHAT : ChannelMessageSource.GROUP)
+                .build();
     }
 
     /**

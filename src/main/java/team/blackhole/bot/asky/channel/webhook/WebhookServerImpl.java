@@ -12,7 +12,6 @@ import team.blackhole.bot.asky.support.exception.AskyException;
 
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.concurrent.Executors;
 

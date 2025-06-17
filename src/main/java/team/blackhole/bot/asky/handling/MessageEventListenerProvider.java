@@ -6,7 +6,7 @@ import com.google.inject.Provider;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.SessionFactory;
 import team.blackhole.bot.asky.config.AskyHandlingConfiguration;
-import team.blackhole.bot.asky.handling.stage.StageManager;
+import team.blackhole.bot.asky.handling.command.CommandHandlerManager;
 
 import java.util.concurrent.Executors;
 
@@ -17,7 +17,7 @@ import java.util.concurrent.Executors;
 public class MessageEventListenerProvider implements Provider<MessageEventListener> {
 
     /** Менеджер стадий */
-    private final StageManager stageManager;
+    private final CommandHandlerManager commandHandlerManager;
 
     /** Шина событий */
     private final EventBus eventBus;
@@ -31,7 +31,7 @@ public class MessageEventListenerProvider implements Provider<MessageEventListen
     @Override
     public MessageEventListener get() {
         var listenerThreadsCount = handlingConfiguration.getHandlingThreadsCount();
-        var listener = new MessageEventListener(stageManager, Executors.newFixedThreadPool(listenerThreadsCount == -1 ?
+        var listener = new MessageEventListener(commandHandlerManager, Executors.newFixedThreadPool(listenerThreadsCount == -1 ?
                 Runtime.getRuntime().availableProcessors() : listenerThreadsCount), sessionFactory);
         eventBus.register(listener);
         return listener;

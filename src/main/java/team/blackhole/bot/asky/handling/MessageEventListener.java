@@ -5,8 +5,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.hibernate.SessionFactory;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
+import team.blackhole.bot.asky.channel.sending.MessageSenderImpl;
 import team.blackhole.bot.asky.db.hibernate.HibernateSessionContextUtils;
-import team.blackhole.bot.asky.handling.stage.StageManager;
+import team.blackhole.bot.asky.handling.command.CommandHandlerManager;
 import team.blackhole.bot.asky.handling.events.MessageEvent;
 
 import java.util.concurrent.ExecutorService;
@@ -19,7 +20,7 @@ import java.util.concurrent.ExecutorService;
 public class MessageEventListener {
 
     /** Менеджер стадий */
-    private final StageManager stageManager;
+    private final CommandHandlerManager commandHandlerManager;
 
     /** Сервис исполнитель обработки сообщений */
     private final ExecutorService executor;
@@ -37,8 +38,11 @@ public class MessageEventListener {
             return;
         }
         executor.submit(() -> {
+            // Устанавливаем локаль для отправки сообщений
+            MessageSenderImpl.SENDING_LOCALE.set(event.getMessage().locale());
+            // Обрабатываем сообщение
             try {
-                stageManager.process(event);
+                commandHandlerManager.process(event);
             } catch (Throwable e) {
                 log.error("Ошибка при обработке события получения сообщения", e);
             } finally {

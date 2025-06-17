@@ -1,4 +1,4 @@
-package team.blackhole.bot.asky.handling.stage;
+package team.blackhole.bot.asky.handling.command;
 
 import lombok.RequiredArgsConstructor;
 import team.blackhole.bot.asky.channel.ChannelMessage;
@@ -17,13 +17,13 @@ import java.util.Map;
  * Менеджер состояния
  */
 @RequiredArgsConstructor
-public class StageManager {
+public class CommandHandlerManager {
 
     /** Отсутствующая стадия */
     private static final Stage NONE = new Stage(StageName.NONE, Collections.emptyMap(), false);
 
     /** Карта, где ключ, это наименование стадии, а значение это сама стадия */
-    private final Map<StageName, StageHandler> stages = new HashMap<>();
+    private final Map<StageName, CommandHandler> stages = new HashMap<>();
 
     /** Репозитория для работы со стадией */
     private final StageRepository stageRepository;
@@ -36,7 +36,7 @@ public class StageManager {
      * @param name    наименование стадии
      * @param handler обработчик стадии
      */
-    public void register(StageName name, StageHandler handler) {
+    public void register(StageName name, CommandHandler handler) {
         stages.put(name, handler);
     }
 
@@ -80,7 +80,7 @@ public class StageManager {
      * @param chatId      идентификатор чата
      * @return стадия пользователя
      */
-    private Stage getStage(ChannelType channelType, long userId, long chatId) {
+    private Stage getStage(ChannelType channelType, long userId, String chatId) {
         return stageRepository.findByKey(getKey(channelType, userId, chatId))
                 .orElse(NONE);
     }
@@ -92,7 +92,7 @@ public class StageManager {
      * @param chatId      идентификатор чата
      * @param stage       стадия для обновления
      */
-    private void updateStage(ChannelType channelType, long userId, long chatId, Stage stage) {
+    private void updateStage(ChannelType channelType, long userId, String chatId, Stage stage) {
         stageRepository.save(getKey(channelType, userId, chatId), stage);
     }
 
@@ -103,7 +103,7 @@ public class StageManager {
      * @param chatId      идентификатор чата
      * @return ключ в регистре redis
      */
-    private String getKey(ChannelType channelType, long userId, long chatId) {
+    private String getKey(ChannelType channelType, long userId, String chatId) {
         return "%s.%s.%s".formatted(channelType.ordinal(), userId, chatId);
     }
 }

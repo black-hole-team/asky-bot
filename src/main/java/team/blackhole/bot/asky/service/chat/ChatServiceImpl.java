@@ -1,11 +1,12 @@
 package team.blackhole.bot.asky.service.chat;
 
 import com.google.inject.Inject;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import team.blackhole.bot.asky.db.hibernate.domains.Chat;
-import team.blackhole.bot.asky.db.hibernate.domains.ChatId;
 import team.blackhole.bot.asky.db.hibernate.repository.ChatRepository;
+import team.blackhole.bot.asky.service.chat.data.CreateChatData;
+
+import java.util.Optional;
 
 /**
  * Реализация сервиса для работы с чатами {@link ChatService}
@@ -17,12 +18,15 @@ public class ChatServiceImpl implements ChatService {
     private final ChatRepository chatRepository;
 
     @Override
-    @Transactional
-    public Chat findByIdOrCreate(ChatId chatId) {
-        return chatRepository.findById(chatId).orElseGet(() -> {
-            var chat = new Chat();
-            chat.setId(chatId);
-            return chatRepository.save(chat);
-        });
+    public Chat create(CreateChatData data) {
+        var chat = new Chat();
+        chat.setChannelChatId(data.channelChatId());
+        chat.setChannelId(data.channelId());
+        return chatRepository.save(chat);
+    }
+
+    @Override
+    public Optional<Chat> findChatByChannelChatIdAndChannelId(String channelId, String channelChatId) {
+        return chatRepository.findChatByChannelChatIdAndChannelId(channelId, channelChatId);
     }
 }

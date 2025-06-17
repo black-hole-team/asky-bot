@@ -32,20 +32,15 @@ public class TicketRepositoryImpl extends AbstractHibernateRepository<Ticket, Lo
     @Override
     public Optional<Ticket> findLastNonClosedTicketByChatId(long chatId) {
         try {
-            var session = sessionFactory.getCurrentSession();
-            var query = session.createQuery(
-                "SELECT t FROM Ticket t " +
-                "WHERE t.chat.id.id = :chatId " +
-                "AND t.status <> :resolvedStatus " +
-                "ORDER BY t.id DESC",
-                Ticket.class
-            );
+            var query = sessionFactory.getCurrentSession()
+                    .createQuery("SELECT t FROM Ticket t WHERE t.chat.id = :chatId AND t.status <> :status ORDER BY t.id DESC", Ticket.class);
 
             query.setParameter("chatId", chatId);
-            query.setParameter("resolvedStatus", TicketStatus.RESOLVED);
+            query.setParameter("status", TicketStatus.RESOLVED);
+
             query.setMaxResults(1);
 
-            return Optional.of(query.getSingleResult());
+            return Optional.ofNullable(query.getSingleResultOrNull());
         } catch (NoResultException e) {
             return Optional.empty();
         }

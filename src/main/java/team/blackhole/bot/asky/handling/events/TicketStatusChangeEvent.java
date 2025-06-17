@@ -12,7 +12,7 @@ import team.blackhole.bot.asky.db.hibernate.domains.TicketStatus;
 @Getter
 @Builder
 @RequiredArgsConstructor
-public class TicketStatusChangeEventCreatedEvent extends AbstractEvent {
+public class TicketStatusChangeEvent extends AbstractEvent {
 
     /** Обращение */
     private final Ticket ticket;

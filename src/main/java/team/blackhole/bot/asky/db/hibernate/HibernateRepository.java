@@ -1,5 +1,6 @@
 package team.blackhole.bot.asky.db.hibernate;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -9,6 +10,12 @@ import java.util.Optional;
 public interface HibernateRepository<T extends PersistentEntity, ID> {
 
     /**
+     * Удаляет сущность по идентификатору
+     * @param id идентификатор сущности
+     */
+    void delete(ID id);
+
+    /**
      * Сохраняет сущность
      * @param entity сущность для сохранения
      * @return сохраненная сущность
@@ -16,9 +23,16 @@ public interface HibernateRepository<T extends PersistentEntity, ID> {
     T save(T entity);
 
     /**
-     * Возвращает сунщость по идентификатору
+     * Возвращает сущность по идентификатору
      * @param id идентификатор
      * @return найденная по идентификатору сущность
      */
     Optional<T> findById(ID id);
+
+    /**
+     * Возвращает список сущностей по идентификаторам
+     * @param ids идентификаторы сущностей
+     * @return список сущностей по идентификаторам
+     */
+    List<T> findAllById(List<ID> ids);
 }

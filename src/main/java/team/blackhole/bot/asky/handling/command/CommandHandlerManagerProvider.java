@@ -1,17 +1,17 @@
-package team.blackhole.bot.asky.handling.stage;
+package team.blackhole.bot.asky.handling.command;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import lombok.RequiredArgsConstructor;
 import team.blackhole.bot.asky.config.AskyHandlingConfiguration;
 import team.blackhole.bot.asky.db.jedis.repository.StageRepository;
-import team.blackhole.bot.asky.handling.stage.handlers.NoneStageHandler;
+import team.blackhole.bot.asky.handling.command.handlers.NoneHandler;
 
 /**
  * Поставщик менеджера стадий
  */
 @RequiredArgsConstructor(onConstructor = @__(@Inject))
-public class StageManagerProvider implements Provider<StageManager> {
+public class CommandHandlerManagerProvider implements Provider<CommandHandlerManager> {
 
     /** Репозитория для работы со стадией */
     private final StageRepository stageRepository;
@@ -19,12 +19,12 @@ public class StageManagerProvider implements Provider<StageManager> {
     /** Конфигурация обработки сообщений */
     private final AskyHandlingConfiguration handlingConfiguration;
 
-    /** Обработчик стадии {@link team.blackhole.bot.asky.handling.stage.StageName#NONE} */
-    private final NoneStageHandler noneStageHandler;
+    /** Обработчик стадии {@link StageName#NONE} */
+    private final NoneHandler noneStageHandler;
 
     @Override
-    public StageManager get() {
-        var manager = new StageManager(stageRepository, handlingConfiguration);
+    public CommandHandlerManager get() {
+        var manager = new CommandHandlerManager(stageRepository, handlingConfiguration);
         manager.register(StageName.NONE, noneStageHandler);
         return manager;
     }

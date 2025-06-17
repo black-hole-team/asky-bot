@@ -1,11 +1,13 @@
 package team.blackhole.bot.asky.service.ticket.data;
 
 import lombok.Builder;
-import team.blackhole.bot.asky.db.hibernate.domains.ChatId;
 
 /**
  * Данные для создания обращения
+ * @param subject       субъект обращения
+ * @param channelId     идентификатор канала
+ * @param channelChatId идентификатор чата в канале
  */
 @Builder
-public record CreateTicketData(String subject, ChatId chatId) {
+public record CreateTicketData(String subject, String channelId, String channelChatId) {
 }

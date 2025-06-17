@@ -35,9 +35,9 @@ public class TelegramBotChatCapability implements ChatCapability {
     }
 
     @Override
-    public ChatUserInfo getChatUserInfo(long chatId, long userId) {
+    public ChatUserInfo getChatUserInfo(String chatId, long userId) {
         try {
-            var member = client.execute(new GetChatMember(String.valueOf(chatId), userId));
+            var member = client.execute(new GetChatMember(chatId, userId));
             var user = member.getUser();
             return new ChatUserInfo(userId, user.getUserName(), user.getFirstName(), user.getLastName());
         } catch (TelegramApiException e) {
@@ -63,7 +63,7 @@ public class TelegramBotChatCapability implements ChatCapability {
                 sendDocumentBuilder.replyToMessageId(Math.toIntExact(sending.replyTo()));
             }
             if (sending.topicId() != null) {
-                sendDocumentBuilder.messageThreadId(Math.toIntExact(sending.topicId()));
+                sendDocumentBuilder.messageThreadId(Integer.parseInt(sending.topicId()));
             }
             try {
                 client.execute(sendDocumentBuilder.build());
@@ -85,7 +85,7 @@ public class TelegramBotChatCapability implements ChatCapability {
             builder.replyToMessageId(Math.toIntExact(sending.replyTo()));
         }
         if (sending.topicId() != null) {
-            builder.messageThreadId(Math.toIntExact(sending.topicId()));
+            builder.messageThreadId(Integer.parseInt(sending.topicId()));
         }
         try {
             client.execute(builder.build());

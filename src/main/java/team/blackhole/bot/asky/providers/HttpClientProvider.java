@@ -1,4 +1,4 @@
-package team.blackhole.bot.asky.channel.telegram.providers;
+package team.blackhole.bot.asky.providers;
 
 import com.google.inject.Provider;
 import org.eclipse.jetty.client.HttpClient;

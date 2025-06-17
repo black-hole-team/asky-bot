@@ -22,7 +22,7 @@ public interface ChatCapability extends ChannelCapability {
      * @param chatId идентификатор чата
      * @param userId идентификатор пользователя
      */
-    ChatUserInfo getChatUserInfo(long chatId, long userId);
+    ChatUserInfo getChatUserInfo(String chatId, long userId);
 
     /**
      * Тип канала, по которому сообщение было получено
@@ -33,7 +33,7 @@ public interface ChatCapability extends ChannelCapability {
      * @param attachments вложения сообщения
      */
     @Builder
-    record MessageSending(long chatId, Long topicId, Long replyTo, String content, List<ChannelAttachment> attachments) {
+    record MessageSending(String chatId, String topicId, Long replyTo, String content, List<ChannelAttachment> attachments) {
     }
 
     /**

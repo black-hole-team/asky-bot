@@ -1,9 +1,6 @@
 package team.blackhole.bot.asky.db.hibernate.domains;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.EmbeddedId;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
@@ -19,13 +16,29 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @Entity
-@Table(name = "chat")
+@Table(
+    name = "chat",
+    indexes = {
+        @Index(name = "idx_chat_channel_chat_id_channel_id", columnList = "channel_chat_id,channel_id", unique = true)
+    }
+)
 public class Chat implements PersistentEntity {
 
     /** Идентификатор */
+    @Id
     @Nonnull
-    @EmbeddedId
-    private ChatId id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    /** Идентификатор чата на стороне канала */
+    @Nonnull
+    @Column(name = "channel_chat_id")
+    private String channelChatId;
+
+    /** Идентификатор канала, которому принадлежит чат */
+    @Nonnull
+    @Column(name = "channel_id")
+    private String channelId;
 
     /** Дата и время создания */
     @CreationTimestamp

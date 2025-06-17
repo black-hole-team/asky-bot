@@ -1,6 +1,6 @@
 package team.blackhole.bot.asky.db.jedis.domain;
 
-import team.blackhole.bot.asky.handling.stage.StageName;
+import team.blackhole.bot.asky.handling.command.StageName;
 
 import java.util.Map;
 

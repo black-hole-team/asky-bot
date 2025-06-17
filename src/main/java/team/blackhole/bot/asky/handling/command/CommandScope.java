@@ -1,9 +1,9 @@
-package team.blackhole.bot.asky.handling.stage;
+package team.blackhole.bot.asky.handling.command;
 
 /**
  * Область действия команды
  */
-public enum StageCommandScope {
+public enum CommandScope {
 
     /** Обычный чат */
     COMMON,

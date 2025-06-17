@@ -8,14 +8,21 @@ import team.blackhole.bot.asky.channel.ChannelCapability;
 public interface HubCapability extends ChannelCapability {
 
     /** Возвращает информацию о хабе по идентификатору */
-    HubInfo getInfo(long hubId);
+    HubInfo getInfo(String hubId);
 
     /**
      * Создает тему в хабе
      * @param hubId идентификатор хаба
      * @param name  наименование темы
      */
-    HubTopicInfo createHubTopic(long hubId, String name);
+    HubTopicInfo createHubTopic(String hubId, String name);
+
+    /**
+     * Удаляет тему хаба
+     * @param hubId   идентификатор хаба
+     * @param topicId идентификатор темы
+     */
+    void deleteHubTopic(String hubId, String topicId);
 
     /**
      * Информация о хабе
@@ -26,11 +33,11 @@ public interface HubCapability extends ChannelCapability {
 
     /**
      * Информация о теме хаба
-     * @param id    идентификатор топика
-     * @param hubId идентификатор хаба
-     * @param name  наименование темы
+     * @param hubTopicId идентификатор темы в хабе
+     * @param hubId      идентификатор хаба
+     * @param name       наименование темы
      */
-    record HubTopicInfo(long id, long hubId, String name) {
+    record HubTopicInfo(String hubTopicId, String hubId, String name) {
 
     }
 }

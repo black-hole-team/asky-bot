@@ -9,6 +9,7 @@ import team.blackhole.bot.asky.db.hibernate.PersistentEntity;
 
 import javax.annotation.Nonnull;
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 /**
  * Домен темы в хабе обработки обращений
@@ -19,42 +20,35 @@ import java.time.LocalDateTime;
 @Table(
     name = "hub_topic",
     indexes = {
-        @Index(name = "hub_topic_ticket_id", columnList = "ticket_id"),
-        @Index(name = "hub_topic_hub_id", columnList = "hub_id"),
-        @Index(name = "hub_topic_hub_channel_id", columnList = "hub_channel_id"),
+        @Index(name = "idx_hub_topic_ticket_id", columnList = "ticket_id"),
+        @Index(name = "idx_hub_topic_hub_id", columnList = "hub_id"),
+        @Index(name = "idx_hub_topic_hub_topic_id", columnList = "hub_topic_id"),
+        @Index(name = "idx_hub_topic_ticket_id_hub_id", columnList = "ticket_id,hub_id", unique = true),
+        @Index(name = "idx_hub_topic_hub_topic_id_hub_id", columnList = "hub_topic_id,hub_id", unique = true),
     }
 )
 public class HubTopic implements PersistentEntity {
 
-    /** Идентификатор темы */
+    /** Идентификатор */
     @Id
     @Nonnull
-    private long id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    /** Идентификатор темы на стороне хаба */
+    @Nonnull
+    @Column(name = "hub_topic_id")
+    private String hubTopicId;
 
     /** Хаб */
     @Nonnull
     @ManyToOne(fetch = FetchType.LAZY)
     private Hub hub;
 
-    /** Идентификатор хаба */
-    @Nonnull
-    @Column(name = "hub_id", insertable = false, updatable = false)
-    private long hubId;
-
-    /** Идентификатор канала хаба */
-    @Nonnull
-    @Column(name = "hub_channel_id", insertable = false, updatable = false)
-    private String hubChannelId;
-
     /** Обращение */
     @Nonnull
     @ManyToOne(fetch = FetchType.LAZY)
     private Ticket ticket;
-
-    /** Идентификатор обращения */
-    @Nonnull
-    @Column(name = "ticket_id", insertable = false, updatable = false)
-    private long ticketId;
 
     /** Дата и время создания */
     @CreationTimestamp
@@ -66,18 +60,12 @@ public class HubTopic implements PersistentEntity {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    /** Дата и время, после наступления которой можно удалить эту тему */
+    @Column(name = "delete_topic_after")
+    private ZonedDateTime deleteTopicAfter;
+
     @Override
     public boolean isNew() {
         return createdAt == null;
-    }
-
-    /**
-     * Устанавливает хаб
-     * @param hub хаб
-     */
-    public void setHub(@Nonnull Hub hub) {
-        this.hub = hub;
-        this.hubId = hub.getId().getId();
-        this.hubChannelId = hub.getId().getChannelId();
     }
 }

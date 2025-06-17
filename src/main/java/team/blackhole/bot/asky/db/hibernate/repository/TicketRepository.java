@@ -9,7 +9,7 @@ import java.util.Optional;
  * Репозиторий для работы с обращениями
  */
 public interface TicketRepository extends HibernateRepository<Ticket, Long> {
-    
+
     /**
      * Возвращает последнее не закрытое обращение по идентификатору чата
      * @param chatId идентификатор чата

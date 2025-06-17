@@ -1,4 +1,4 @@
-package team.blackhole.bot.asky.handling.stage;
+package team.blackhole.bot.asky.handling.command;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -11,10 +11,7 @@ import lombok.Getter;
 public enum StageName {
 
     /** Без стадии */
-    NONE(false),
-
-    /** Регистрация хаба */
-    HUB_REGISTRATION(true);
+    NONE(false);
 
     /** Признак возможности отмены стадии */
     private final boolean canBeCanceled;

@@ -19,10 +19,10 @@ public interface TicketService {
 
     /**
      * Возвращает обращение по идентификатору
-     * @param ticketId идентификатор обращения
+     * @param id идентификатор обращения
      * @return найденное обращение
      */
-    Optional<Ticket> findById(long ticketId);
+    Optional<Ticket> findById(long id);
 
     /**
      * Возвращает последнее не закрытое обращение по идентификатору чата
@@ -33,8 +33,8 @@ public interface TicketService {
 
     /**
      * Обновляет статус обращения
-     * @param ticketId идентификатор обращения
-     * @param status   статус обращения
+     * @param id     идентификатор обращения
+     * @param status статус обращения
      */
-    Ticket updateTicketStatus(long ticketId, TicketStatus status);
+    Ticket updateTicketStatus(long id, TicketStatus status);
 }
