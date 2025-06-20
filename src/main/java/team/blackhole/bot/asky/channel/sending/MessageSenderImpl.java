@@ -8,7 +8,7 @@ import team.blackhole.bot.asky.channel.ChannelMessage;
 import team.blackhole.bot.asky.channel.ChannelPool;
 import team.blackhole.bot.asky.channel.capability.ChatCapability;
 import team.blackhole.bot.asky.config.AskyHubConfiguration;
-import team.blackhole.bot.asky.db.hibernate.domains.HubTopic;
+import team.blackhole.bot.asky.db.hibernate.domains.HubType;
 import team.blackhole.bot.asky.support.MessageSource;
 
 import java.time.Duration;
@@ -16,7 +16,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -60,48 +59,38 @@ public class MessageSenderImpl implements MessageSender {
     }
 
     @Override
+    public void sendTicketNotFoundMessage(String channelId, String channelChatId, long ticketId) {
+        sendSimpleMessage(channelId, channelChatId, null, "message$ticket_not_found", ticketId);
+    }
+
+    @Override
+    public void sendHubNotFoundMessage(String channelId, String channelChatId) {
+        sendSimpleMessage(channelId, channelChatId, null, "message$hub_not_found");
+    }
+
+    @Override
     public void sendTicketResolvedUserMessage(String channelId, String channelChatId, long ticketId) {
-        pool.getChannelById(channelId).getCapability(ChatCapability.class).ifPresent(chatCapability ->
-            chatCapability.send(ChatCapability.MessageSending.builder()
-                .chatId(channelChatId)
-                .content(messageSource.getMessage("message$ticket_has_been_resolved_user", SENDING_LOCALE.get(), ticketId))
-                .build()));
+        sendSimpleMessage(channelId, channelChatId, null, "message$ticket_has_been_resolved_user", ticketId);
     }
 
     @Override
     public void sendTicketResolvedOperatorMessage(String channelId, String channelChatId, String topicId, long ticketId) {
-        pool.getChannelById(channelId).getCapability(ChatCapability.class).ifPresent(chatCapability -> {
-            chatCapability.send(ChatCapability.MessageSending.builder()
-                .chatId(channelChatId)
-                .topicId(topicId)
-                .content(messageSource.getMessage("message$ticket_has_been_resolved_operator", SENDING_LOCALE.get(), ticketId))
-                .build());
-        });
+        sendSimpleMessage(channelId, channelChatId, topicId, "message$ticket_has_been_resolved_operator", ticketId);
     }
 
     @Override
     public void sendHubCreatedMessage(String channelId, String channelChatId, String topicId, String hubName) {
-        pool.getChannelById(channelId).getCapability(ChatCapability.class).ifPresent(chatCapability -> {
-            chatCapability.send(ChatCapability.MessageSending.builder()
-                .chatId(channelChatId)
-                .topicId(topicId)
-                .content(messageSource.getMessage("message$hub_created", SENDING_LOCALE.get(), hubName))
-                .build());
-        });
+        sendSimpleMessage(channelId, channelChatId, topicId, "message$hub_created", hubName);
     }
 
     @Override
     public void sendWelcomeMessage(String channelId, String channelChatId, String userFirstName) {
-        pool.getChannelById(channelId).getCapability(ChatCapability.class).ifPresent(chat -> chat.send(ChatCapability.MessageSending.builder()
-                .chatId(channelChatId)
-                .content(messageSource.getMessage("message$hello_message", SENDING_LOCALE.get(), userFirstName))
-                .build()));
+        sendSimpleMessage(channelId, channelChatId, null, "message$hello_message", userFirstName);
     }
 
     @Override
-    public void forwardMessageToHubTopic(ChannelMessage message, HubTopic topic) {
-        var hub = topic.getHub();
-        sendMessageToHubTopic(hub.getChannelId(), hub.getChannelHubId(), topic.getHubTopicId(), message.content(), message.attachments());
+    public void forwardMessageToHubTopic(String channelId, String channelHubId, String channelHubIdTopicId, ChannelMessage message) {
+        sendMessageToHubTopic(channelId, channelHubId, channelHubIdTopicId, message.content(), message.attachments());
     }
 
     @Override
@@ -115,20 +104,21 @@ public class MessageSenderImpl implements MessageSender {
     }
 
     @Override
-    public void sendNewTicketTopicMessage(String channelId, String channelHubId, String channelHubIdTopicId, String ticketSubject, long ticketId,
-                                          LocalDateTime ticketCreatedAt, String userLastName, String userFirstName, String userUsername) {
-        sendMessageToHubTopic(channelId, channelHubId, channelHubIdTopicId, messageSource.getMessage("message$new_ticket_topic", SENDING_LOCALE.get(),
-                ticketSubject, ticketId, TICKET_DATE_TIME_FORMATTER.format(ticketCreatedAt), Stream.of(userUsername == null ? null : "@%s".formatted(userUsername), userLastName, userFirstName)
-                        .filter(Objects::nonNull)
-                        .map(String::valueOf)
-                        .collect(Collectors.joining(", "))), Collections.emptyList());
+    public void sendNewTicketMessage(String channelId, String channelHubId, String channelHubIdTopicId, HubType hubType, String ticketSubject, long ticketId,
+                                     LocalDateTime ticketCreatedAt, String userLastName, String userFirstName, String userUsername) {
+        sendSimpleMessage(channelId, channelHubId, channelHubIdTopicId, "message$new_ticket_" + hubType.name().toLowerCase(),
+                ticketSubject,
+                ticketId,
+                TICKET_DATE_TIME_FORMATTER.format(ticketCreatedAt),
+                Stream.of(userUsername == null ? null : "@%s".formatted(userUsername), userLastName, userFirstName)
+                        .filter(Objects::nonNull).map(String::valueOf).collect(Collectors.joining(", ")));
     }
 
     @Override
     public void sendThisTopicWillBeDeleted(String channelId, String channelHubId, String channelHubIdTopicId, ZonedDateTime deleteTopicAfter) {
-        sendMessageToHubTopic(channelId, channelHubId, channelHubIdTopicId, messageSource.getMessage("message$this_topic_will_be_deleted", SENDING_LOCALE.get(),
+        sendSimpleMessage(channelId, channelHubId, channelHubIdTopicId, "message$this_topic_will_be_deleted",
                 formatDuration(Duration.between(ZonedDateTime.now(ZoneOffset.UTC), deleteTopicAfter)),
-                TICKET_DATE_TIME_FORMATTER.format(deleteTopicAfter.withZoneSameInstant(hubConfiguration.getTimezone()))), Collections.emptyList());
+                TICKET_DATE_TIME_FORMATTER.format(deleteTopicAfter.withZoneSameInstant(hubConfiguration.getTimezone())));
     }
 
     /**
@@ -154,15 +144,14 @@ public class MessageSenderImpl implements MessageSender {
      * @param chatId     идентификатор чата
      * @param topicId    идентификатор темы чата
      * @param messageKey ключ сообщения
+     * @param format     параметры форматирования
      */
-    private void sendSimpleMessage(String channelId, String chatId, String topicId, String messageKey) {
-        pool.getChannelById(channelId).getCapability(ChatCapability.class).ifPresent(chatCapability -> {
-            chatCapability.send(ChatCapability.MessageSending.builder()
-                .chatId(chatId)
-                .topicId(topicId)
-                .content(messageSource.getMessage(messageKey, SENDING_LOCALE.get()))
-                .build());
-        });
+    private void sendSimpleMessage(String channelId, String chatId, String topicId, String messageKey, Object... format) {
+        pool.getChannelById(channelId).getCapability(ChatCapability.class).ifPresent(chatCapability -> chatCapability.send(ChatCapability.MessageSending.builder()
+            .chatId(chatId)
+            .topicId(topicId)
+            .content(messageSource.getMessage(messageKey, SENDING_LOCALE.get(), format))
+            .build()));
     }
 
     /**

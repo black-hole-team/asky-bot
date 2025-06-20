@@ -1,6 +1,6 @@
-package team.blackhole.bot.asky.handling.command.annotation;
+package team.blackhole.bot.asky.handling.message.command.annotation;
 
-import team.blackhole.bot.asky.handling.command.CommandScope;
+import team.blackhole.bot.asky.handling.message.command.CommandScope;
 import team.blackhole.bot.asky.security.AskyUserRole;
 
 import java.lang.annotation.*;
@@ -14,8 +14,8 @@ import java.lang.annotation.*;
 public @interface Command {
 
     /**
-     * Возвращает комменду
-     * @return комманда
+     * Возвращает команду
+     * @return команда
      */
     String value() default AnnotationCommandHandler.ANY_COMMAND;
 
@@ -23,7 +23,7 @@ public @interface Command {
      * Возвращает роли пользователей, которым разрешено выполнять команду
      * @return роли пользователей, которым разрешено выполнять команду
      */
-    AskyUserRole[] role() default {AskyUserRole.BAN, AskyUserRole.ADMIN, AskyUserRole.COMMON, AskyUserRole.OPERATOR};
+    AskyUserRole[] role() default {AskyUserRole.ADMIN, AskyUserRole.COMMON, AskyUserRole.OPERATOR};
 
     /**
      * Возвращает области действия команды

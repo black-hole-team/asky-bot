@@ -1,4 +1,4 @@
-package team.blackhole.bot.asky.handling.command;
+package team.blackhole.bot.asky.handling.message.command;
 
 /**
  * Область действия команды

@@ -37,6 +37,10 @@ public class Ticket implements PersistentEntity {
     @Column(length = 512)
     private String subject;
 
+    /** Идентификатор пользователя */
+    @Column(name = "user_id")
+    private long userId;
+
     /** Чат, в котором обращение было создано */
     @Nonnull
     @ManyToOne(fetch = FetchType.LAZY)

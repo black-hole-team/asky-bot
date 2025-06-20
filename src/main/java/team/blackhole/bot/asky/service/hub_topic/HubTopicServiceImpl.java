@@ -4,10 +4,12 @@ import com.google.inject.Inject;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import team.blackhole.bot.asky.db.hibernate.domains.HubTopic;
+import team.blackhole.bot.asky.db.hibernate.domains.HubType;
 import team.blackhole.bot.asky.db.hibernate.repository.HubTopicRepository;
 import team.blackhole.bot.asky.service.hub.HubService;
 import team.blackhole.bot.asky.service.hub_topic.data.HubTopicCreateData;
 import team.blackhole.bot.asky.service.ticket.TicketService;
+import team.blackhole.bot.asky.support.exception.AskyException;
 
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -32,8 +34,13 @@ public class HubTopicServiceImpl implements HubTopicService {
     @Transactional
     public HubTopic create(HubTopicCreateData data) {
         var hubTopic = new HubTopic();
+        var hub = hubService.findById(data.hubId()).orElseThrow();
 
-        hubTopic.setHub(hubService.findById(data.hubId()).orElseThrow());
+        if (hub.getType() == HubType.SINGLE_CHAT) {
+            throw new AskyException("Хаб организованный как чат не может иметь тем");
+        }
+
+        hubTopic.setHub(hub);
         hubTopic.setTicket(ticketService.findById(data.ticketId()).orElseThrow());
         hubTopic.setHubTopicId(data.hubTopicId());
 

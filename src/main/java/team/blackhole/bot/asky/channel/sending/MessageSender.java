@@ -1,7 +1,7 @@
 package team.blackhole.bot.asky.channel.sending;
 
 import team.blackhole.bot.asky.channel.ChannelMessage;
-import team.blackhole.bot.asky.db.hibernate.domains.HubTopic;
+import team.blackhole.bot.asky.db.hibernate.domains.HubType;
 
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
@@ -24,6 +24,21 @@ public interface MessageSender {
      * @param channelChatId идентификатор чата в канале
      */
     void sendHubAlreadyExistsMessage(String channelId, String channelChatId);
+
+    /**
+     * Отправляет сообщение о не найденном обращении
+     * @param channelId     идентификатор канала
+     * @param channelChatId идентификатор чата в канале
+     * @param ticketId      идентификатор обращения
+     */
+    void sendTicketNotFoundMessage(String channelId, String channelChatId, long ticketId);
+
+    /**
+     * Отправляет сообщение о не найденном хабе
+     * @param channelId     идентификатор канала
+     * @param channelChatId идентификатор чата в канале
+     */
+    void sendHubNotFoundMessage(String channelId, String channelChatId);
 
     /**
      * Отправляет сообщение о том, что обращение уже закрыто
@@ -69,10 +84,12 @@ public interface MessageSender {
 
     /**
      * Пересылает сообщение в хаб с текстом из исходного сообщения
-     * @param message исходное сообщение
-     * @param topic   тема для пересылки
+     * @param channelId           идентификатор канала
+     * @param channelHubId        идентификатор хаба канала
+     * @param channelHubIdTopicId идентификатор темы в хабе канала
+     * @param message             исходное сообщение
      */
-    void forwardMessageToHubTopic(ChannelMessage message, HubTopic topic);
+    void forwardMessageToHubTopic(String channelId, String channelHubId, String channelHubIdTopicId, ChannelMessage message);
 
     /**
      * Пересылает сообщение пользователю
@@ -87,6 +104,7 @@ public interface MessageSender {
      * @param channelId           идентификатор канала
      * @param channelHubId        идентификатор хаба канала
      * @param channelHubIdTopicId идентификатор темы в хабе канала
+     * @param hubType             тип хаба
      * @param ticketSubject       субъект заявки
      * @param ticketId            идентификатор заявки
      * @param ticketCreatedAt     дата и время создания заявки
@@ -94,8 +112,8 @@ public interface MessageSender {
      * @param userLastName        фамилия пользователя
      * @param userUsername        тег пользователя
      */
-    void sendNewTicketTopicMessage(String channelId, String channelHubId, String channelHubIdTopicId, String ticketSubject, long ticketId,
-                                          LocalDateTime ticketCreatedAt, String userLastName, String userFirstName, String userUsername);
+    void sendNewTicketMessage(String channelId, String channelHubId, String channelHubIdTopicId, HubType hubType, String ticketSubject, long ticketId,
+                              LocalDateTime ticketCreatedAt, String userLastName, String userFirstName, String userUsername);
 
 
     /**

@@ -41,6 +41,11 @@ public class Hub implements PersistentEntity {
     @Column(name = "channel_id")
     private String channelId;
 
+    /** Тип хаба */
+    @Nonnull
+    @Enumerated(EnumType.STRING)
+    private HubType type;
+
     /** Наименование хаба */
     @Nonnull
     private String name;

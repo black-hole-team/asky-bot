@@ -33,6 +33,7 @@ public class HubServiceImpl implements HubService {
         hub.setChannelHubId(data.channelHubId());
         hub.setChannelId(data.channelId());
         hub.setName(data.name());
+        hub.setType(data.type());
         hub = hubRepository.save(hub);
 
         eventBus.post(new HubCreatedEvent(hub));

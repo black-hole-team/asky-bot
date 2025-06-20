@@ -7,7 +7,8 @@ import lombok.Builder;
  * @param subject       субъект обращения
  * @param channelId     идентификатор канала
  * @param channelChatId идентификатор чата в канале
+ * @param channelUserId идентификатор пользователя, на стороне канала обращения
  */
 @Builder
-public record CreateTicketData(String subject, String channelId, String channelChatId) {
+public record CreateTicketData(String subject, String channelId, String channelChatId, long channelUserId) {
 }

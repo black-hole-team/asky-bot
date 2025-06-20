@@ -1,4 +1,4 @@
-package team.blackhole.bot.asky.handling.command;
+package team.blackhole.bot.asky.handling.message;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

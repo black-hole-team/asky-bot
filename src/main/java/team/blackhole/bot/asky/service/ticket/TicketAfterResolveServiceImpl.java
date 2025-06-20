@@ -47,7 +47,7 @@ public class TicketAfterResolveServiceImpl implements TicketAfterResolveService 
             // Иначе устанавливаем дату и время запланированного удаления темы хаба
             var topicsDeleteAfter = ZonedDateTime.now(ZoneOffset.UTC).plus(hubConfiguration.getDeleteTopicTimeout());
             for (var topic : ticket.getTopics()) {
-                topic.setDeleteTopicAfter(topicsDeleteAfter);
+                hubTopicService.setDeleteAfter(topic.getId(), topicsDeleteAfter);
             }
             ticketDelayedQueue.add(ticket.getId(), topicsDeleteAfter);
         }

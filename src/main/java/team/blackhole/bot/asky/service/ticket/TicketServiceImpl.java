@@ -37,6 +37,7 @@ public class TicketServiceImpl implements TicketService {
 
         ticket.setSubject(data.subject());
         ticket.setTopics(new ArrayList<>());
+        ticket.setUserId(data.channelUserId());
         // Получаем или создаем чат
         ticket.setChat(chatService.findChatByChannelChatIdAndChannelId(data.channelId(), data.channelChatId())
                 .orElseThrow());

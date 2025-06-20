@@ -1,13 +1,13 @@
-package team.blackhole.bot.asky.handling.command.annotation;
+package team.blackhole.bot.asky.handling.message.command.annotation;
 
 import lombok.RequiredArgsConstructor;
-import org.jetbrains.annotations.NotNull;
 import team.blackhole.bot.asky.channel.ChannelMessage;
 import team.blackhole.bot.asky.channel.ChannelMessageSource;
 import team.blackhole.bot.asky.db.jedis.domain.Stage;
-import team.blackhole.bot.asky.handling.command.CommandHandler;
-import team.blackhole.bot.asky.handling.command.CommandScope;
-import team.blackhole.bot.asky.handling.events.MessageEvent;
+import team.blackhole.bot.asky.handling.message.command.CommandContext;
+import team.blackhole.bot.asky.handling.message.command.CommandHandler;
+import team.blackhole.bot.asky.handling.message.command.CommandScope;
+import team.blackhole.bot.asky.handling.message.command.PatternCommandHandler;
 import team.blackhole.bot.asky.security.AskyUser;
 import team.blackhole.bot.asky.security.AskyUserRole;
 import team.blackhole.bot.asky.support.ReflexionUtils;
@@ -16,43 +16,19 @@ import team.blackhole.bot.asky.support.exception.AskyException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 import java.util.function.Consumer;
-import java.util.stream.Stream;
+import java.util.regex.Pattern;
 
 /**
  * Обработчик команд на основе аннотаций
  */
-public abstract class AnnotationCommandHandler implements CommandHandler {
-
-    /** Обработчик любой команды */
-    public static final String ANY_COMMAND = "*";
-
-    /** Карта, где ключ это команда, а значение это обработчик команды */
-    private final Map<String, CommandHandler> commands = new HashMap<>();
+public abstract class AnnotationCommandHandler extends PatternCommandHandler {
 
     /** Функции выполняемые перед обработкой сообщения */
     private final List<Consumer<CommandContext>> beforeFunctions = new ArrayList<>();
-
-    @Override
-    public Stage handle(AskyUser user, Stage stage, MessageEvent event) {
-        var message = event.getMessage();
-        var command = getCommand(message.content());
-        var handler = commands.get(command);
-        if (handler == null) {
-            handler = commands.get(ANY_COMMAND);
-        }
-        return handler == null ? stage : handler.handle(user, stage, event);
-    }
-
-    /**
-     * Регистрирует новую команду и её обработчик
-     * @param command команда (например, "/start")
-     * @param handler функция-обработчик команды
-     */
-    protected void registerCommand(String command, CommandHandler handler) {
-        commands.put(command, handler);
-    }
 
     /**
      * Регистрирует функции выполняемые перед обработкой сообщения
@@ -60,32 +36,6 @@ public abstract class AnnotationCommandHandler implements CommandHandler {
      */
     protected void registerBefore(Consumer<CommandContext> beforeFunction) {
         this.beforeFunctions.add(beforeFunction);
-    }
-
-    /**
-     * Извлекает первое слово из строки (команду).
-     * @param message входное сообщение
-     * @return Первое слово или пустую строку, если сообщение пустое
-     */
-    private static String getCommand(String message) {
-        if (message == null || message.isBlank()) {
-            return "";
-        }
-
-        // Убираем лишние пробелы и разбиваем по пробелам
-        var trimmed = message.trim();
-        int firstSpaceIndex = Stream.of(trimmed.indexOf(' '), trimmed.indexOf('@'))
-                .filter(e -> e != -1)
-                .findFirst()
-                .orElse(-1);
-
-        // Если пробела нет, возвращаем всю строку
-        if (firstSpaceIndex == -1) {
-            return trimmed;
-        }
-
-        // Иначе берем подстроку до первого пробела
-        return trimmed.substring(0, firstSpaceIndex);
     }
 
     // Инициализатор
@@ -98,7 +48,7 @@ public abstract class AnnotationCommandHandler implements CommandHandler {
             }
             var command = method.getDeclaredAnnotation(Command.class);
             if (command != null) {
-                registerCommand(command.value(), new SecuredCommandHandler(command, Set.of(command.role()), Set.of(command.scopes()),
+                registerCommand(Pattern.compile(command.value()), new SecuredCommandHandler(command, Set.of(command.role()), Set.of(command.scopes()),
                         method, method.getParameters()));
             }
         }
@@ -161,13 +111,16 @@ public abstract class AnnotationCommandHandler implements CommandHandler {
         private final Parameter[] parameters;
 
         @Override
-        public Stage handle(AskyUser user, Stage stage, MessageEvent event) {
-            var message = event.getMessage();
-            if (!canAccess(user, message)) {
+        public Stage handle(CommandContext context) {
+            if (!canAccess(context.get(AskyUser.class), context.get(ChannelMessage.class))) {
                 throw new AskyException("Доступ запрещен");
             }
             try {
-                return (Stage) method.invoke(AnnotationCommandHandler.this, getParams(user, stage, event));
+                var result = method.invoke(AnnotationCommandHandler.this, getParams(context));
+                if (result == null) {
+                    return Stage.propagation(context.get(Stage.class), false);
+                }
+                return (Stage) result;
             } catch (IllegalAccessException | InvocationTargetException e) {
                 throw new AskyException("Ошибка при вызове метода команды '%s'".formatted(command.value()), e);
             }
@@ -195,13 +148,10 @@ public abstract class AnnotationCommandHandler implements CommandHandler {
 
         /**
          * Возвращает параметры для вызова метода
-         * @param user  пользователь
-         * @param stage стадия
-         * @param event событие сообщения
+         * @param context контекст
          * @return параметры для вызова метода
          */
-        private Object[] getParams(AskyUser user, Stage stage, MessageEvent event) {
-            var context = getCommandContext(user, stage, event);
+        private Object[] getParams(CommandContext context) {
             for (var current : beforeFunctions) {
                 current.accept(context);
             }
@@ -210,23 +160,6 @@ public abstract class AnnotationCommandHandler implements CommandHandler {
                 params[i] = context.get(parameters[i].getType());
             }
             return params;
-        }
-
-        /**
-         * Возвращает контекст команды
-         * @param user  пользователь
-         * @param stage стадия
-         * @param event событие сообщения
-         * @return контекст команды
-         */
-        @NotNull
-        private static CommandContext getCommandContext(AskyUser user, Stage stage, MessageEvent event) {
-            var context = new CommandContext();
-            context.register(AskyUser.class, () -> user);
-            context.register(Stage.class, () -> stage);
-            context.register(MessageEvent.class, () -> event);
-            context.register(CommandContext.class, () -> context);
-            return context;
         }
     }
 }

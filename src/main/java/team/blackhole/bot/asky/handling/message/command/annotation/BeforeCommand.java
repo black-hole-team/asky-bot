@@ -1,4 +1,4 @@
-package team.blackhole.bot.asky.handling.command.annotation;
+package team.blackhole.bot.asky.handling.message.command.annotation;
 
 import java.lang.annotation.*;
 
