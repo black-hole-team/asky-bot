@@ -1,6 +1,7 @@
 package team.blackhole.bot.asky.service.hub_topic;
 
 import team.blackhole.bot.asky.db.hibernate.domains.HubTopic;
+import team.blackhole.bot.asky.service.HibernateService;
 import team.blackhole.bot.asky.service.hub_topic.data.HubTopicCreateData;
 
 import java.time.ZonedDateTime;
@@ -10,7 +11,7 @@ import java.util.Optional;
 /**
  * Сервис для работы с темами хаба
  */
-public interface HubTopicService {
+public interface HubTopicService extends HibernateService<HubTopic, Long> {
 
     /**
      * Создает тему хаба
@@ -25,12 +26,6 @@ public interface HubTopicService {
      * @param after дата и время удаления темы
      */
     HubTopic setDeleteAfter(long id, ZonedDateTime after);
-
-    /**
-     * Удаляет тему хаба
-     * @param id идентификатор темы хаба
-     */
-    void deleteTopic(long id);
 
     /**
      * Возвращает опциональное значение темы хаба по идентификатору канала, идентификатору хаба в канале и идентификатора темы в хабе

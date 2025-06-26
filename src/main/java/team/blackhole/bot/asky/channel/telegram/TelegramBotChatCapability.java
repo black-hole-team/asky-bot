@@ -2,14 +2,23 @@ package team.blackhole.bot.asky.channel.telegram;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.StringUtils;
+import org.hibernate.internal.util.collections.CollectionHelper;
 import org.telegram.telegrambots.meta.api.methods.groupadministration.GetChatMember;
 import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageReplyMarkup;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 import team.blackhole.bot.asky.channel.capability.ChatCapability;
 import team.blackhole.bot.asky.support.exception.AskyException;
+
+import java.util.ArrayList;
 
 /**
  * Возможность отправки сообщений через telegram бота
@@ -26,11 +35,22 @@ public class TelegramBotChatCapability implements ChatCapability {
 
     @Override
     public void send(MessageSending sending) {
-        if (sending.content() != null) {
+        if (!StringUtils.isEmpty(sending.content())) {
             sendContent(sending);
         }
-        if (sending.attachments() != null) {
+        if (!CollectionHelper.isEmpty(sending.attachments())) {
             sendAttachments(sending);
+        }
+    }
+
+    @Override
+    public void edit(MessageEdit edit) {
+        if (StringUtils.isEmpty(edit.content())) {
+            if (!CollectionHelper.isEmpty(edit.actions())) {
+                sendReplyMarkup(edit);
+            }
+        } else {
+            sendContent(edit);
         }
     }
 
@@ -42,6 +62,63 @@ public class TelegramBotChatCapability implements ChatCapability {
             return new ChatUserInfo(userId, user.getUserName(), user.getFirstName(), user.getLastName());
         } catch (TelegramApiException e) {
             throw new AskyException("Ошибка при попытке получить пользователя чата: [chatId = %s, userId = %s]".formatted(chatId, userId), e);
+        }
+    }
+
+    /**
+     * Отправляет отредактированную разметку сообщения
+     * @param edit данные для редактирования сообщения
+     */
+    private void sendReplyMarkup(MessageEdit edit) {
+        var builder = EditMessageReplyMarkup.builder()
+                .chatId(edit.chatId())
+                .messageId(edit.messageId());
+        var rows = new ArrayList<InlineKeyboardRow>();
+        for (var buttons : edit.actions()) {
+            var row = new InlineKeyboardRow();
+            for (var button : buttons) {
+                row.add(InlineKeyboardButton.builder()
+                        .text(button.text())
+                        .callbackData(button.payload())
+                        .build());
+            }
+            rows.add(row);
+        }
+        builder.replyMarkup(new InlineKeyboardMarkup(rows));
+        try {
+            client.execute(builder.build());
+        } catch (TelegramApiException e) {
+            throw new AskyException("Ошибка при отправке сообщения: %s".formatted(edit), e);
+        }
+    }
+
+    /**
+     * Отправляет отредактированное содержимое сообщения
+     * @param edit данные для редактирования сообщения
+     */
+    private void sendContent(MessageEdit edit) {
+        var builder = EditMessageText.builder()
+                .chatId(edit.chatId())
+                .messageId(edit.messageId())
+                .text(edit.content());
+        if (!CollectionHelper.isEmpty(edit.actions())) {
+            var rows = new ArrayList<InlineKeyboardRow>();
+            for (var buttons : edit.actions()) {
+                var row = new InlineKeyboardRow();
+                for (var button : buttons) {
+                    row.add(InlineKeyboardButton.builder()
+                            .text(button.text())
+                            .callbackData(button.payload())
+                            .build());
+                }
+                rows.add(row);
+            }
+            builder.replyMarkup(new InlineKeyboardMarkup(rows));
+        }
+        try {
+            client.execute(builder.build());
+        } catch (TelegramApiException e) {
+            throw new AskyException("Ошибка при отправке сообщения: %s".formatted(edit), e);
         }
     }
 
@@ -86,6 +163,20 @@ public class TelegramBotChatCapability implements ChatCapability {
         }
         if (sending.topicId() != null) {
             builder.messageThreadId(Integer.parseInt(sending.topicId()));
+        }
+        if (!CollectionHelper.isEmpty(sending.actions())) {
+            var rows = new ArrayList<InlineKeyboardRow>();
+            for (var buttons : sending.actions()) {
+                var row = new InlineKeyboardRow();
+                for (var button : buttons) {
+                    row.add(InlineKeyboardButton.builder()
+                            .text(button.text())
+                            .callbackData(button.payload())
+                            .build());
+                }
+                rows.add(row);
+            }
+            builder.replyMarkup(new InlineKeyboardMarkup(rows));
         }
         try {
             client.execute(builder.build());

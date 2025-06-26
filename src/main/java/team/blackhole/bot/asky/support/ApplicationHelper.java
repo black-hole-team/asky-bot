@@ -14,7 +14,7 @@ import java.util.Set;
 public class ApplicationHelper {
 
     /** Русская локаль */
-    public final static Locale RU = new Locale("RU-ru");
+    public final static Locale RU = Locale.of("ru", "RU");
 
     /** Список профилей определенных в окружении запуска приложения */
     public final static Set<String> ENV = Set.of(System.getenv("ASKY_PROFILES") == null ?

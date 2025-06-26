@@ -2,7 +2,12 @@ package team.blackhole.bot.asky.db.hibernate;
 
 import lombok.extern.log4j.Log4j2;
 import org.hibernate.SessionFactory;
+import org.hibernate.query.sqm.tree.select.SqmSelectStatement;
+import team.blackhole.bot.asky.db.support.Page;
+import team.blackhole.bot.asky.db.support.PageImpl;
+import team.blackhole.data.filter.Filter;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -38,6 +43,20 @@ public abstract class AbstractHibernateRepository<T extends PersistentEntity, ID
     public void delete(ID id) {
         var session = getSessionFactory().getCurrentSession();
         session.remove(session.find(getPersistentClass(), id));
+    }
+
+    @Override
+    public Page<T> findAll(Filter filter) {
+        var session = getSessionFactory().getCurrentSession();
+        var query = (SqmSelectStatement<T>) new HibernateFilterConverter<>(session, getPersistentClass()).convert(filter);
+        var count = session.createQuery(query.createCountQuery()).getSingleResult();
+        if (count == 0) {
+            return new PageImpl<>(Collections.emptyList(), filter.getPage(), 0, filter);
+        }
+        return new PageImpl<>(session.createQuery(query)
+                .setMaxResults(filter.getPageSize())
+                .setFirstResult(filter.getPage() * filter.getPageSize())
+                .getResultList(), filter.getPage(), count, filter);
     }
 
     /**

@@ -4,9 +4,10 @@ import com.google.common.eventbus.EventBus;
 import com.google.inject.Inject;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import team.blackhole.bot.asky.db.hibernate.HibernateRepository;
 import team.blackhole.bot.asky.db.hibernate.domains.Hub;
 import team.blackhole.bot.asky.db.hibernate.repository.HubRepository;
-import team.blackhole.bot.asky.handling.events.HubCreatedEvent;
+import team.blackhole.bot.asky.events.HubCreatedEvent;
 import team.blackhole.bot.asky.service.hub.data.CreateHubData;
 
 import java.util.Collection;
@@ -42,11 +43,6 @@ public class HubServiceImpl implements HubService {
     }
 
     @Override
-    public Optional<Hub> findById(long id) {
-        return hubRepository.findById(id);
-    }
-
-    @Override
     public Optional<Hub> findHubByChannelHubIdAndChannelId(String channelId, String channelHubId) {
         return hubRepository.findHubByChannelHubIdAndChannelId(channelId, channelHubId);
     }
@@ -54,5 +50,10 @@ public class HubServiceImpl implements HubService {
     @Override
     public List<Hub> findHubsByChannelId(Collection<String> channelIds) {
         return hubRepository.findHubsByChannelId(channelIds);
+    }
+
+    @Override
+    public HibernateRepository<Hub, Long> getRepository() {
+        return hubRepository;
     }
 }

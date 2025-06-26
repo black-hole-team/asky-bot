@@ -3,6 +3,7 @@ package team.blackhole.bot.asky.service.hub_topic;
 import com.google.inject.Inject;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import team.blackhole.bot.asky.db.hibernate.HibernateRepository;
 import team.blackhole.bot.asky.db.hibernate.domains.HubTopic;
 import team.blackhole.bot.asky.db.hibernate.domains.HubType;
 import team.blackhole.bot.asky.db.hibernate.repository.HubTopicRepository;
@@ -57,11 +58,6 @@ public class HubTopicServiceImpl implements HubTopicService {
     }
 
     @Override
-    public void deleteTopic(long id) {
-        hubTopicRepository.delete(id);
-    }
-
-    @Override
     public Optional<HubTopic> findHubTopicByChannelIdAndHubIdAndHubTopicId(String channelId, String channelHubId, String channelHubTopicId) {
         return hubTopicRepository.findHubTopicByChannelIdAndHubIdAndHubTopicId(channelId, channelHubId, channelHubTopicId);
     }
@@ -79,5 +75,10 @@ public class HubTopicServiceImpl implements HubTopicService {
     @Override
     public List<HubTopic> findHubTopicsByTicketIds(List<Long> ticketIds) {
         return hubTopicRepository.findHubTopicsByTicketIds(ticketIds);
+    }
+
+    @Override
+    public HibernateRepository<HubTopic, Long> getRepository() {
+        return hubTopicRepository;
     }
 }

@@ -1,6 +1,7 @@
 package team.blackhole.bot.asky.service.chat;
 
 import team.blackhole.bot.asky.db.hibernate.domains.Chat;
+import team.blackhole.bot.asky.service.HibernateService;
 import team.blackhole.bot.asky.service.chat.data.CreateChatData;
 
 import java.util.Optional;
@@ -8,7 +9,7 @@ import java.util.Optional;
 /**
  * Сервис для работы с чатами
  */
-public interface ChatService {
+public interface ChatService extends HibernateService<Chat, Long> {
 
     /**
      * Создает новый чат

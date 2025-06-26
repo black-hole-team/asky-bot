@@ -19,6 +19,6 @@ import java.util.Locale;
  * @param source      источник сообщения
  */
 @Builder
-public record ChannelMessage(ChannelType channelType, String channelId, long id, String chatId, String topicId, long userId, String content,
-                             List<ChannelAttachment> attachments, Locale locale, ChannelMessageSource source) {
+public record ChannelMessage(ChannelType channelType, String channelId, int id, String chatId, String topicId, long userId, String content,
+                             List<ChannelAttachment> attachments, Locale locale, ChannelMessageSource source) implements ChannelEntity {
 }

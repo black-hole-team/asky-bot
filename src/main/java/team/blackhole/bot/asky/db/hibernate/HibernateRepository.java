@@ -1,5 +1,8 @@
 package team.blackhole.bot.asky.db.hibernate;
 
+import team.blackhole.bot.asky.db.support.Page;
+import team.blackhole.data.filter.Filter;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -21,6 +24,13 @@ public interface HibernateRepository<T extends PersistentEntity, ID> {
      * @return сохраненная сущность
      */
     T save(T entity);
+
+    /**
+     * Возвращает страницу по фильтру
+     * @param filter фильтр для поиска сущностей
+     * @return страница сущностей по фильтру
+     */
+    Page<T> findAll(Filter filter);
 
     /**
      * Возвращает сущность по идентификатору

@@ -18,6 +18,12 @@ public interface ChatCapability extends ChannelCapability {
     void send(MessageSending sending);
 
     /**
+     * Редактирует сообщение
+     * @param edit данные для редактирования сообщения
+     */
+    void edit(MessageEdit edit);
+
+    /**
      * Возвращает информацию о пользователя чата
      * @param chatId идентификатор чата
      * @param userId идентификатор пользователя
@@ -25,15 +31,28 @@ public interface ChatCapability extends ChannelCapability {
     ChatUserInfo getChatUserInfo(String chatId, long userId);
 
     /**
-     * Тип канала, по которому сообщение было получено
+     * Данные для редактирования сообщения
+     * @param chatId    идентификатор
+     * @param messageId идентификатор сообщения
+     * @param content   содержимое сообщения
+     * @param actions   действия над сообщением
+     */
+    @Builder
+    record MessageEdit(String chatId, int messageId, String content, List<List<MessageAction>> actions) {
+    }
+
+    /**
+     * Данные для отправки сообщения
      * @param chatId      идентификатор чата
      * @param topicId     идентификатор темы
      * @param replyTo     идентификатор сообщения для ответа
      * @param content     содержимое сообщения
      * @param attachments вложения сообщения
+     * @param actions     действия над сообщением
      */
     @Builder
-    record MessageSending(String chatId, String topicId, Long replyTo, String content, List<ChannelAttachment> attachments) {
+    record MessageSending(String chatId, String topicId, Long replyTo, String content, List<ChannelAttachment> attachments,
+                          List<List<MessageAction>> actions) {
     }
 
     /**
@@ -45,6 +64,16 @@ public interface ChatCapability extends ChannelCapability {
      */
     @Builder
     record ChatUserInfo(long userId, String username, String firstName, String lastName) {
+
+    }
+
+    /**
+     * Действие над сообщением
+     * @param text    текст действия
+     * @param payload полезная нагрузка действия
+     */
+    @Builder
+    record MessageAction(String text, String payload) {
 
     }
 }

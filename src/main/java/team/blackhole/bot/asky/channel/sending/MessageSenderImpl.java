@@ -7,8 +7,10 @@ import team.blackhole.bot.asky.channel.ChannelAttachment;
 import team.blackhole.bot.asky.channel.ChannelMessage;
 import team.blackhole.bot.asky.channel.ChannelPool;
 import team.blackhole.bot.asky.channel.capability.ChatCapability;
+import team.blackhole.bot.asky.channel.sending.renderer.MessageRenderer;
 import team.blackhole.bot.asky.config.AskyHubConfiguration;
 import team.blackhole.bot.asky.db.hibernate.domains.HubType;
+import team.blackhole.bot.asky.security.AskyUserRole;
 import team.blackhole.bot.asky.support.MessageSource;
 
 import java.time.Duration;
@@ -42,6 +44,26 @@ public class MessageSenderImpl implements MessageSender {
 
     /** Конфигурация хабов */
     private final AskyHubConfiguration hubConfiguration;
+
+    @Override
+    public void send(String channelId, String channelChatId, String topicId, MessageRenderer renderer) {
+        pool.getChannelById(channelId).getCapabilityOrThrow(ChatCapability.class).send(ChatCapability.MessageSending.builder()
+                .chatId(channelChatId)
+                .topicId(topicId)
+                .content(renderer.render(SENDING_LOCALE.get()))
+                .actions(renderer.actions(SENDING_LOCALE.get()))
+                .build());
+    }
+
+    @Override
+    public void edit(String channelId, String channelChatId, int messageId, MessageRenderer renderer) {
+        pool.getChannelById(channelId).getCapabilityOrThrow(ChatCapability.class).edit(ChatCapability.MessageEdit.builder()
+                .messageId(messageId)
+                .chatId(channelChatId)
+                .content(renderer.render(SENDING_LOCALE.get()))
+                .actions(renderer.actions(SENDING_LOCALE.get()))
+                .build());
+    }
 
     @Override
     public void sendNoHubFoundForChannelMessage(String channelId, String chatId) {
@@ -86,6 +108,16 @@ public class MessageSenderImpl implements MessageSender {
     @Override
     public void sendWelcomeMessage(String channelId, String channelChatId, String userFirstName) {
         sendSimpleMessage(channelId, channelChatId, null, "message$hello_message", userFirstName);
+    }
+
+    @Override
+    public void sendHelpMessage(String channelId, String channelChatId, String topicId, AskyUserRole role) {
+        sendSimpleMessage(channelId, channelChatId, topicId, "message$%s_help".formatted(role.name().toLowerCase()));
+    }
+
+    @Override
+    public void sendTicketNotSelectedMessage(String channelId, String channelChatId) {
+        sendSimpleMessage(channelId, channelChatId, null, "message$ticket_not_selected");
     }
 
     @Override

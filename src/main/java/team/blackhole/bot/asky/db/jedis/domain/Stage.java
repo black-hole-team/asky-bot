@@ -1,9 +1,8 @@
 package team.blackhole.bot.asky.db.jedis.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import team.blackhole.bot.asky.handling.message.StageName;
+import team.blackhole.bot.asky.handling.StageName;
 
-import java.beans.Transient;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;

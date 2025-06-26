@@ -4,13 +4,16 @@ import com.google.common.eventbus.EventBus;
 import com.google.inject.Inject;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import team.blackhole.bot.asky.db.hibernate.HibernateRepository;
 import team.blackhole.bot.asky.db.hibernate.domains.Ticket;
 import team.blackhole.bot.asky.db.hibernate.domains.TicketStatus;
 import team.blackhole.bot.asky.db.hibernate.repository.TicketRepository;
-import team.blackhole.bot.asky.handling.events.TicketCreatedEvent;
-import team.blackhole.bot.asky.handling.events.TicketStatusChangeEvent;
+import team.blackhole.bot.asky.db.support.Page;
+import team.blackhole.bot.asky.events.TicketCreatedEvent;
+import team.blackhole.bot.asky.events.TicketStatusChangeEvent;
 import team.blackhole.bot.asky.service.chat.ChatService;
 import team.blackhole.bot.asky.service.ticket.data.CreateTicketData;
+import team.blackhole.data.filter.Filter;
 
 import java.util.ArrayList;
 import java.util.Optional;
@@ -51,8 +54,8 @@ public class TicketServiceImpl implements TicketService {
     }
 
     @Override
-    public Optional<Ticket> findById(long ticketId) {
-        return ticketRepository.findById(ticketId);
+    public HibernateRepository<Ticket, Long> getRepository() {
+        return ticketRepository;
     }
 
     @Override

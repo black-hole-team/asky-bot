@@ -54,6 +54,9 @@ dependencies {
     // Библиотеки апача
     implementation(libs.apache.commons.text)
     implementation(libs.apache.commons.io)
+
+    // Фильтрация
+    implementation(libs.data.filter)
 }
 
 tasks {

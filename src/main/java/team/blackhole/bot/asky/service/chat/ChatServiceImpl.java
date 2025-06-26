@@ -2,6 +2,7 @@ package team.blackhole.bot.asky.service.chat;
 
 import com.google.inject.Inject;
 import lombok.RequiredArgsConstructor;
+import team.blackhole.bot.asky.db.hibernate.HibernateRepository;
 import team.blackhole.bot.asky.db.hibernate.domains.Chat;
 import team.blackhole.bot.asky.db.hibernate.repository.ChatRepository;
 import team.blackhole.bot.asky.service.chat.data.CreateChatData;
@@ -28,5 +29,10 @@ public class ChatServiceImpl implements ChatService {
     @Override
     public Optional<Chat> findChatByChannelChatIdAndChannelId(String channelId, String channelChatId) {
         return chatRepository.findChatByChannelChatIdAndChannelId(channelId, channelChatId);
+    }
+
+    @Override
+    public HibernateRepository<Chat, Long> getRepository() {
+        return chatRepository;
     }
 }

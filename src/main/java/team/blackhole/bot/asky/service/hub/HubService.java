@@ -1,6 +1,8 @@
 package team.blackhole.bot.asky.service.hub;
 
 import team.blackhole.bot.asky.db.hibernate.domains.Hub;
+import team.blackhole.bot.asky.db.hibernate.domains.HubTopic;
+import team.blackhole.bot.asky.service.HibernateService;
 import team.blackhole.bot.asky.service.hub.data.CreateHubData;
 
 import java.util.Collection;
@@ -10,20 +12,13 @@ import java.util.Optional;
 /**
  * Сервис для работы с хабом
  */
-public interface HubService {
+public interface HubService extends HibernateService<Hub, Long> {
 
     /**
      * Создает хаб
      * @param data данные для создания хаба
      */
     Hub create(CreateHubData data);
-
-    /**
-     * Возвращает хаб по идентификатору
-     * @param id идентификатор хаба
-     * @return опциональное значение хаба
-     */
-    Optional<Hub> findById(long id);
 
     /**
      * Возвращает хаб по идентификатору канала и идентификатору хаба в канале

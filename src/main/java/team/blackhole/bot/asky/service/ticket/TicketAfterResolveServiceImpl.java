@@ -93,7 +93,7 @@ public class TicketAfterResolveServiceImpl implements TicketAfterResolveService 
                         .getCapability(HubCapability.class)
                         .ifPresent(hubCapability -> hubCapability.deleteHubTopic(hub.getChannelHubId(), topic.getHubTopicId()));
                 // Удаляем тему из БД
-                hubTopicService.deleteTopic(topic.getId());
+                hubTopicService.delete(topic.getId());
             }
         }
         if (topicsToContinues.isEmpty()) {

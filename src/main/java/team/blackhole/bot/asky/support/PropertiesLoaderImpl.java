@@ -23,7 +23,7 @@ public class PropertiesLoaderImpl implements PropertiesLoader {
 
     @Override
     public Properties loadProperties(String baseName, Locale locale) {
-        var resourceName = baseName + "_" + locale + ".properties";
+        var resourceName = baseName + "_" + locale.getLanguage() + ".properties";
         try (var stream = Files.newInputStream(basePath.resolve(resourceName))) {
             var props = new Properties();
             props.load(new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8)));

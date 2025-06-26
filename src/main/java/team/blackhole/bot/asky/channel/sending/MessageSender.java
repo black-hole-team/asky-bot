@@ -1,7 +1,9 @@
 package team.blackhole.bot.asky.channel.sending;
 
 import team.blackhole.bot.asky.channel.ChannelMessage;
+import team.blackhole.bot.asky.channel.sending.renderer.MessageRenderer;
 import team.blackhole.bot.asky.db.hibernate.domains.HubType;
+import team.blackhole.bot.asky.security.AskyUserRole;
 
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
@@ -10,6 +12,24 @@ import java.time.ZonedDateTime;
  * Сервис для отправки сообщений
  */
 public interface MessageSender {
+
+    /**
+     * Отправляет сообщение
+     * @param channelId     идентификатор канала
+     * @param channelChatId идентификатор чата в канале
+     * @param topicId       идентификатор темы хаба
+     * @param renderer      отрисовщик сообщения
+     */
+    void send(String channelId, String channelChatId, String topicId, MessageRenderer renderer);
+
+    /**
+     * Редактирует сообщение
+     * @param channelId     идентификатор канала
+     * @param channelChatId идентификатор чата в канале
+     * @param messageId     идентификатор сообщения в чате
+     * @param renderer      отрисовщик сообщения
+     */
+    void edit(String channelId, String channelChatId, int messageId, MessageRenderer renderer);
 
     /**
      * Отправляет сообщение о том, что не найдены хабы для данного канала
@@ -81,6 +101,22 @@ public interface MessageSender {
      * @param userFirstName имя пользователя
      */
     void sendWelcomeMessage(String channelId, String channelChatId, String userFirstName);
+
+    /**
+     * Отсылает сообщение со справкой по командам бота
+     * @param channelId     идентификатор канала
+     * @param channelChatId идентификатор чата в канале
+     * @param topicId       идентификатор темы
+     * @param role          роль пользователя
+     */
+    void sendHelpMessage(String channelId, String channelChatId, String topicId, AskyUserRole role);
+
+    /**
+     * Отправляет сообщение о том, что ни одно обращение не выбрано
+     * @param channelId     идентификатор канала
+     * @param channelChatId идентификатор чата в канале
+     */
+    void sendTicketNotSelectedMessage(String channelId, String channelChatId);
 
     /**
      * Пересылает сообщение в хаб с текстом из исходного сообщения
