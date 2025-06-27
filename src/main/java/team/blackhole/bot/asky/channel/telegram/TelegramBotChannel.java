@@ -21,7 +21,7 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * Канал телеграмм бота
+ * Канал бота Telegram
  */
 @Log4j2
 @RequiredArgsConstructor
