@@ -5,6 +5,8 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import team.blackhole.bot.asky.config.AskyExecutableConfiguration;
+import team.blackhole.bot.asky.config.AskyExecutableHooksConfiguration;
 import team.blackhole.bot.asky.events.AbstractEvent;
 import team.blackhole.bot.asky.support.ApplicationHelper;
 import team.blackhole.bot.asky.support.exception.AskyException;
@@ -28,6 +30,9 @@ public class HookEngineProvider implements Provider<HookEngine> {
     /** Фабрика хуков */
     private final HookFactory hookFactory;
 
+    /** Конфигурация хуков */
+    private final AskyExecutableConfiguration executableConfiguration;
+
     @Override
     public HookEngine get() {
         var engine = new HookEngine(hooks());
@@ -41,10 +46,9 @@ public class HookEngineProvider implements Provider<HookEngine> {
      */
     private Map<Class<? extends AbstractEvent>, Hook[]> hooks() {
         var result = new HashMap<Class<? extends AbstractEvent>, Hook[]>();
-        var hooksDir = ApplicationHelper.getHomePath().resolve("hooks");
         for (var current : HookType.values()) {
             log.info("Регистрация хуков типа '{}'", current);
-            var hookDir = hooksDir.resolve(current.name().toLowerCase());
+            var hookDir = executableConfiguration.getHooks().getDir().resolve(current.name().toLowerCase());
             if (!Files.exists(hookDir)) {
                 log.info("Хуки типа '{}' не найдены", current);
                 continue;
@@ -56,7 +60,7 @@ public class HookEngineProvider implements Provider<HookEngine> {
                         continue;
                     }
                     log.info("Регистрация файла хука '{}'", file);
-                    hooks.add(hookFactory.create(file));
+                    hooks.add(hookFactory.create(file.toAbsolutePath()));
                     log.info("Файл хука '{}' успешно зарегистрирован", file);
                 }
             } catch (IOException e) {

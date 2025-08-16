@@ -45,4 +45,11 @@ public class TicketRepositoryImpl extends AbstractHibernateRepository<Ticket, Lo
             return Optional.empty();
         }
     }
+
+    @Override
+    public long getNextTicketId() {
+        return sessionFactory.getCurrentSession()
+                .createQuery("SELECT NEXTVAL('ticket_id_seq')", Long.class)
+                .getSingleResult();
+    }
 }

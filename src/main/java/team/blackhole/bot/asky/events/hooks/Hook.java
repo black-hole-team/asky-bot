@@ -5,7 +5,7 @@ import team.blackhole.bot.asky.events.AbstractEvent;
 /**
  * Хук для события бота поддержки
  */
-public interface Hook extends AutoCloseable {
+public interface Hook {
 
     /**
      * Обрабатывает событие бота поддержки

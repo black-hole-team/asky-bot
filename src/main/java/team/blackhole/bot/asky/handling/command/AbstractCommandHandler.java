@@ -199,7 +199,7 @@ public abstract class AbstractCommandHandler<T extends ChannelEntity> implements
                 }
                 return (Stage) result;
             } catch (IllegalAccessException | InvocationTargetException e) {
-                throw new AskyException("Ошибка при вызове метода команды '%s'".formatted(command.value()), e);
+                throw new AskyException("Ошибка при вызове метода команды '%s'".formatted(command.value()), e.getCause());
             }
         }
 

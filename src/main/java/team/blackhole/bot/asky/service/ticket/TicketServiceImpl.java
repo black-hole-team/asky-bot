@@ -34,6 +34,11 @@ public class TicketServiceImpl implements TicketService {
     private final EventBus eventBus;
 
     @Override
+    public long getNextTicketId() {
+        return ticketRepository.getNextTicketId();
+    }
+
+    @Override
     @Transactional
     public Ticket create(CreateTicketData data) {
         var ticket = new Ticket();

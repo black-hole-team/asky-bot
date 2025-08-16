@@ -191,13 +191,6 @@ channels {
 }
 ```
 
-### Хабы обработки заявок
-```
-hub {
-    subject_name_pattern = "#${userId}-${channelId}"
-}
-```
-
 ### Обработка сообщений и маршрутизация
 ```
 handling {

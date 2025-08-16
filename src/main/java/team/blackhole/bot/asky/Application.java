@@ -15,6 +15,7 @@ import team.blackhole.bot.asky.config.AskyConfigurationModule;
 import team.blackhole.bot.asky.db.DatabaseModule;
 import team.blackhole.bot.asky.db.jedis.JedisModule;
 import team.blackhole.bot.asky.events.EventsModule;
+import team.blackhole.bot.asky.executable.ExecutableModule;
 import team.blackhole.bot.asky.handling.HandlersModule;
 import team.blackhole.bot.asky.providers.ProvidersModule;
 import team.blackhole.bot.asky.queue.QueueModule;
@@ -36,7 +37,7 @@ public class Application {
      * @param args аргументы запуска
      */
     public static void main(String[] args) {
-        var injector = Guice.createInjector(Stage.PRODUCTION, new AskyConfigurationModule(), new ProvidersModule(), new JedisModule(),
+        var injector = Guice.createInjector(Stage.PRODUCTION, new AskyConfigurationModule(), new ProvidersModule(), new ExecutableModule(), new JedisModule(),
                 new DatabaseModule(), new QueueModule(), new ChannelModule(), new ServiceModule(), new EventsModule(), new HandlersModule(),
                 new SchedulingModule());
 

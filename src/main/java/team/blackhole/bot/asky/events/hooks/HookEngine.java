@@ -10,7 +10,7 @@ import java.util.Map;
  * Движок выполнения хуков
  */
 @RequiredArgsConstructor
-public class HookEngine implements AutoCloseable {
+public class HookEngine {
 
     /** Карта, где ключ это тип события хука, а значение это массив хуков */
     private final Map<Class<? extends AbstractEvent>, Hook[]> hooks;
@@ -62,14 +62,5 @@ public class HookEngine implements AutoCloseable {
     @Subscribe
     public void onCallbackEvent(CallbackEvent event) {
         produce(event);
-    }
-
-    @Override
-    public void close() throws Exception {
-        for (var hooks : hooks.values()) {
-            for (var hook : hooks) {
-                hook.close();
-            }
-        }
     }
 }

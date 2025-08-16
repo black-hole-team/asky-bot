@@ -24,6 +24,7 @@ public class AskyConfigurationModule implements Module {
         binder.bind(AskyRedisConfiguration.class).toInstance(new AskyRedisConfiguration(resolved.getConfig("redis")));
         binder.bind(AskyHubConfiguration.class).toInstance(new AskyHubConfiguration(resolved.getConfig("hub")));
         binder.bind(AskyHandlingConfiguration.class).toInstance(new AskyHandlingConfiguration(resolved.getConfig("handling")));
+        binder.bind(AskyExecutableConfiguration.class).toInstance(new AskyExecutableConfiguration(resolved.getConfig("executable")));
     }
 
     /**

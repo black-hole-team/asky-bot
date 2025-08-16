@@ -17,6 +17,7 @@ import team.blackhole.bot.asky.config.AskyHubConfiguration;
 import team.blackhole.bot.asky.db.hibernate.domains.*;
 import team.blackhole.bot.asky.db.jedis.domain.Stage;
 import team.blackhole.bot.asky.db.jedis.repository.StageRepository;
+import team.blackhole.bot.asky.executable.ExecutableFactory;
 import team.blackhole.bot.asky.service.hub.HubService;
 import team.blackhole.bot.asky.service.hub.data.CreateHubData;
 import team.blackhole.bot.asky.service.hub_topic.HubTopicService;
@@ -26,6 +27,7 @@ import team.blackhole.bot.asky.service.ticket.TicketService;
 import team.blackhole.bot.asky.service.ticket.data.CreateTicketData;
 import team.blackhole.bot.asky.support.exception.AskyException;
 
+import java.nio.file.Path;
 import java.util.HashMap;
 
 /**
@@ -39,9 +41,6 @@ public class NoneMessageHandlerHelper {
 
     /** Конфигурация обработки сообщений */
     private final AskyHandlingConfiguration handlingConfiguration;
-
-    /** Конфигурация хабов */
-    private final AskyHubConfiguration askyHubConfiguration;
 
     /** Сервис для отправки сообщений */
     private final MessageSender messageSender;
@@ -60,6 +59,9 @@ public class NoneMessageHandlerHelper {
 
     /** Репозитория для работы со стадией */
     private final StageRepository stageRepository;
+
+    /** Фабрика исполняемых пользовательских сценариев */
+    private final ExecutableFactory executableFactory;
 
     /**
      * Обрабатывает сообщение от пользователя (без topicId)
@@ -117,7 +119,7 @@ public class NoneMessageHandlerHelper {
                         .channelChatId(message.chatId())
                         .channelId(message.channelId())
                         .channelUserId(message.userId())
-                        .subject(getTicketSubject(message))
+                        .subject(getTicketSubject(message, ticketService.getNextTicketId()))
                         .build())));
     }
 
@@ -285,17 +287,13 @@ public class NoneMessageHandlerHelper {
 
     /**
      * Возвращает субъект обращения
-     * @param message сообщение
+     * @param message  сообщение
+     * @param ticketId следующий идентификатор обращения
      * @return субъект обращения
      */
-    public String getTicketSubject(ChannelMessage message) {
-        var values = new HashMap<String, String>();
-        values.put("channelId", message.channelId());
-        values.put("userId", String.valueOf(message.userId()));
-        values.put("chatId", String.valueOf(message.chatId()));
-        values.put("locale", String.valueOf(message.locale()));
-        values.put("messageId", String.valueOf(message.id()));
-        return StringSubstitutor.replace(askyHubConfiguration.getSubjectNamePattern(), values);
+    public String getTicketSubject(ChannelMessage message, long ticketId) {
+        return String.valueOf(executableFactory.create(Path.of("subject"), "getSubject")
+                .accept(message, ticketId));
     }
 
     /**

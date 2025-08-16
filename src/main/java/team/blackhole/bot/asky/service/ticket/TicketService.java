@@ -13,6 +13,12 @@ import java.util.Optional;
 public interface TicketService extends HibernateService<Ticket, Long> {
 
     /**
+     * Возвращает следующий идентификатор обращения
+     * @return следующий идентификатор обращения
+     */
+    long getNextTicketId();
+
+    /**
      * Создает обращение
      * @param data данные для создания обращения
      */

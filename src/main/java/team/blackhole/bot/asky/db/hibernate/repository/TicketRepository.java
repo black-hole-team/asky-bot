@@ -16,4 +16,10 @@ public interface TicketRepository extends HibernateRepository<Ticket, Long> {
      * @return обращение
      */
     Optional<Ticket> findLastNonClosedTicketByChatId(long chatId);
+
+    /**
+     * Возвращает следующий идентификатор обращения
+     * @return следующий идентификатор обращения
+     */
+    long getNextTicketId();
 }

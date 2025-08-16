@@ -4,7 +4,7 @@
  */
 function handle(event) {
     // Выводим событие получения сообщения в лог
-    logger.info(getLogMessage(event.getMessage()));
+    LOGGER.info(getLogMessage(event.getMessage()));
 }
 
 /**
